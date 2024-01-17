@@ -40,12 +40,16 @@ class EventManager {
         const list = this._effectsMap[hook];
         list?.push({ effects, weight });
     }
-    /**添加调用eoc事件 */
-    addInvoke(hook, weight, ...eocids) {
+    /**添加调用eocid事件 */
+    addInvokeID(hook, weight, ...eocids) {
         this.verifyHook(hook);
         this._effectsMap[hook] = this._effectsMap[hook] ?? [];
         const list = this._effectsMap[hook];
         list?.push({ effects: [{ run_eocs: eocids }], weight });
+    }
+    /**添加调用eoc事件 */
+    addInvokeEoc(hook, weight, ...eocs) {
+        return this.addInvokeID(hook, weight, ...eocs.map((item) => item.id));
     }
     /**添加自定义的Hook */
     addHook(hook, eoc) {
