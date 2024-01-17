@@ -60,5 +60,9 @@ class EventManager {
         if (this._hookMap[hook] == null)
             throw `hook:${hook} 不存在`;
     }
+    /**获取前缀 */
+    getPrefix() {
+        return this._prefix;
+    }
 }
 exports.EventManager = EventManager;

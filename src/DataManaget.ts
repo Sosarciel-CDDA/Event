@@ -71,14 +71,17 @@ export class DataManager{
     }
     /**添加事件 */
     addEvent(hook: AnyHook, weight: number, effects: EocEffect[]): void {
+        if(this._em===undefined) throw "未定义事件框架ID前缀"
         return this._em?.addEvent(hook,weight,effects);
     }
     /**添加调用eocid事件 */
     addInvokeID(hook: AnyHook, weight: number, ...eocids: EocID[]): void {
+        if(this._em===undefined) throw "未定义事件框架ID前缀"
         return this._em?.addInvokeID(hook,weight,...eocids);
     }
     /**添加调用eoc事件 */
     addInvokeEoc(hook: AnyHook, weight: number, ...eocs: Eoc[]): void {
+        if(this._em===undefined) throw "未定义事件框架ID前缀"
         return this._em?.addInvokeEoc(hook,weight,...eocs);
     }
     /**输出所有数据  
@@ -89,7 +92,7 @@ export class DataManager{
         if(this._dataPath!=null){
             //复制静态数据
             const staticDataPath = path.join(this._dataPath,"StaticData");
-            UtilFT.ensurePathExists(staticDataPath,true);
+            await UtilFT.ensurePathExists(staticDataPath,true);
             //await
             fs.promises.cp(staticDataPath,this._outPath,{ recursive: true });
         }
@@ -105,5 +108,9 @@ export class DataManager{
         //导出共用资源
         for(const filePath in this._sharedTable)
             this.saveToFile(filePath,Object.values(this._sharedTable[filePath]));
+
+        //导出event框架
+        if(this._em)
+            this.saveToFile(`${this._em.getPrefix()}_event_frame`,this._em.build());
     }
 }

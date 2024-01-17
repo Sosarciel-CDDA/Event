@@ -18,4 +18,6 @@ export declare class EventManager {
     addHook(hook: string, eoc: HookObj): void;
     /**验证hook是否存在 */
     private verifyHook;
+    /**获取前缀 */
+    getPrefix(): string;
 }
