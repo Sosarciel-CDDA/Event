@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "@zwa73/utils": "^1.0.60",
+    "cdda-schema": "file:../CDDA-Schema",
+    "tsc-alias": "^1.8.8",
+    "typescript": "^5.3.3"
+  },
+  "name": "cdda-event",
+  "version": "1.0.0",
+  "description": "typescript的cddaevent快捷操作",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx tsc & npx tsc-alias"
+  },
+  "keywords": [
+    "cdda"
+  ],
+  "author": "zwa73",
+  "license": "ISC"
+}
