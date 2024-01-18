@@ -29,13 +29,26 @@ export class EventManager {
             //加入effect
             let elist = this._effectsMap[fixkey]||[];
             elist.sort((a,b)=>b.weight-a.weight);
+
             const eventeffects:EocEffect[] = [];
             elist.forEach((e)=>eventeffects.push(...e.effects));
+
+            const mergeeffects:EocEffect[]=[];
+            eventeffects.forEach((e)=>{
+                const lastobj = mergeeffects[mergeeffects.length-1];
+                if( typeof lastobj == "object" && 'run_eocs' in lastobj && Array.isArray(lastobj.run_eocs) &&
+                    typeof e == "object" && 'run_eocs' in e && Array.isArray(e.run_eocs)){
+                        lastobj.run_eocs.push(...e.run_eocs)
+                    }
+                else
+                    mergeeffects.push(e)
+            })
+
             const eoc = {
                 type:"effect_on_condition",
                 ...hookObj.base_setting,
                 id:`${this._prefix}_${key}_EVENT` as EocID,
-                effect:[...hookObj.before_effects??[],...eventeffects,...hookObj.after_effects??[]]
+                effect:[...hookObj.before_effects??[],...mergeeffects,...hookObj.after_effects??[]]
             }
             //整合eoc数组
             json.push(eoc);
