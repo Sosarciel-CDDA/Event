@@ -30,6 +30,8 @@ exports.CharHookList = [
     "MoveStatus", //移动状态
     "IdleStatus", //待机状态
     "AttackStatus", //攻击状态
+    "WieldItem", //手持物品
+    "WearItem", //穿戴物品
 ];
 /**全局事件列表 列表 */
 exports.GlobalHookList = [
@@ -42,6 +44,12 @@ exports.AnyEventTypeList = [
     ...exports.GlobalHookList,
     ...exports.CharHookList,
 ];
+/**生成基础事件
+ * @param prefix        - 事件前缀
+ * @param statusDur     - 行动状态持续时间
+ * @param battleDur     - 战斗持续时间
+ * @param slowCounter   - 慢速刷新间隔
+ */
 function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 60) {
     const eid = (id) => `${prefix}_${id}_EVENT`;
     const rune = (id) => ({ run_eocs: eid(id) });
@@ -199,10 +207,6 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
                         }],
                     else: [rune("NonBattleUpdate")]
                 }, {
-                    if: { math: [uv("slowCounter"), ">=", `${slowCounter}`] },
-                    then: [rune("SlowUpdate"), { math: [uv("slowCounter"), "=", "1"] }],
-                    else: [{ math: [uv("slowCounter"), "+=", "1"] }]
-                }, {
                     set_string_var: { u_val: uv("char_preloc") },
                     target_var: { global_val: gv("char_preloc") }
                 }, {
@@ -225,12 +229,39 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
                 }]
         },
         Init: defObj,
-        SlowUpdate: defObj,
+        SlowUpdate: {
+            base_setting: {
+                eoc_type: "RECURRING",
+                recurrence: slowCounter,
+                global: true,
+                run_for_npcs: true
+            }
+        },
         AvatarUpdate: {
             base_setting: {
                 eoc_type: "RECURRING",
                 recurrence: 1
             }
+        },
+        WieldItem: {
+            base_setting: {
+                eoc_type: "EVENT",
+                required_event: "character_wields_item"
+            }
+            /**
+            { "character", character_id },
+            { "itype", itype_id },
+             */
+        },
+        WearItem: {
+            base_setting: {
+                eoc_type: "EVENT",
+                required_event: "character_wears_item"
+            }
+            /**
+            { "character", character_id },
+            { "itype", itype_id },
+             */
         },
         MoveStatus: defObj,
         IdleStatus: defObj,
