@@ -34,7 +34,9 @@ export const CharHookList = [
     "MoveStatus"                ,//移动状态
     "IdleStatus"                ,//待机状态
     "AttackStatus"              ,//攻击状态
-    "WieldItem"                 ,//手持物品
+    "WieldItemRaw"              ,//基础手持物品
+    "WieldItem"                 ,//手持非空物品
+    "StowItem"                  ,//收回物品/手持空物品
     "WearItem"                  ,//穿戴物品
 ] as const;
 /**任何角色事件  
@@ -124,6 +126,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             /*
             { "character", character_id }
             { "damage", int }
+            character / NONE
 	        */
         },
         TryMeleeAtkChar:{
@@ -138,6 +141,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             { "hits", bool },
             { "victim", character_id },
             { "victim_name", string },
+            character (attacker) / character (victim)
             */
         },
         TryMeleeAtkMon:{
@@ -151,6 +155,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             { "weapon", itype_id },
             { "hits", bool },
             { "victim_type", mtype_id },
+            character / monster
             */
         },
         TryMeleeAttack:{
@@ -180,6 +185,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             { "weapon", itype_id },
             { "victim", character_id },
             { "victim_name", string },
+            character (attacker) / character (victim)
             */
         },
         TryRangeAtkMon:{
@@ -192,6 +198,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             { "attacker", character_id },
             { "weapon", itype_id },
             { "victim_type", mtype_id },
+            character / monster
             */
         },
         TryRangeAttack:{
@@ -222,7 +229,10 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
                 then:[rune("Death")],
                 else:["u_prevent_death"]
             }]
-            //{ "character", character_id },
+            /**
+            { "character", character_id },
+            character / NONE
+            */
         },
         Death:defObj,
         AvatarMove:{
@@ -285,16 +295,24 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
                 recurrence: 1
             }
         },
-        WieldItem:{
+        WieldItemRaw:{
             base_setting: {
                 eoc_type: "EVENT",
                 required_event: "character_wields_item"
-            }
+            },
+            after_effects:[{
+                if:{compare_string:["null",{context_val:"itype"}]},
+                then:[rune("StowItem")],
+                else:[rune("WieldItem")]
+            }]
             /**
             { "character", character_id },
             { "itype", itype_id },
+            character / item to wield
              */
         },
+        WieldItem:defObj,
+        StowItem:defObj,
         WearItem:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -303,6 +321,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             /**
             { "character", character_id },
             { "itype", itype_id },
+            character / item to wield
              */
         },
         MoveStatus:defObj,

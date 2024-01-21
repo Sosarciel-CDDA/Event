@@ -30,7 +30,9 @@ exports.CharHookList = [
     "MoveStatus", //移动状态
     "IdleStatus", //待机状态
     "AttackStatus", //攻击状态
-    "WieldItem", //手持物品
+    "WieldItemRaw", //基础手持物品
+    "WieldItem", //手持非空物品
+    "StowItem", //收回物品/手持空物品
     "WearItem", //穿戴物品
 ];
 /**全局事件列表 列表 */
@@ -82,6 +84,7 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             /*
             { "character", character_id }
             { "damage", int }
+            character / NONE
             */
         },
         TryMeleeAtkChar: {
@@ -96,6 +99,7 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             { "hits", bool },
             { "victim", character_id },
             { "victim_name", string },
+            character (attacker) / character (victim)
             */
         },
         TryMeleeAtkMon: {
@@ -109,6 +113,7 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             { "weapon", itype_id },
             { "hits", bool },
             { "victim_type", mtype_id },
+            character / monster
             */
         },
         TryMeleeAttack: {
@@ -138,6 +143,7 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             { "weapon", itype_id },
             { "victim", character_id },
             { "victim_name", string },
+            character (attacker) / character (victim)
             */
         },
         TryRangeAtkMon: {
@@ -150,6 +156,7 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             { "attacker", character_id },
             { "weapon", itype_id },
             { "victim_type", mtype_id },
+            character / monster
             */
         },
         TryRangeAttack: {
@@ -180,7 +187,10 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
                     then: [rune("Death")],
                     else: ["u_prevent_death"]
                 }]
-            //{ "character", character_id },
+            /**
+            { "character", character_id },
+            character / NONE
+            */
         },
         Death: defObj,
         AvatarMove: {
@@ -243,16 +253,24 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
                 recurrence: 1
             }
         },
-        WieldItem: {
+        WieldItemRaw: {
             base_setting: {
                 eoc_type: "EVENT",
                 required_event: "character_wields_item"
-            }
+            },
+            after_effects: [{
+                    if: { compare_string: ["null", { context_val: "itype" }] },
+                    then: [rune("StowItem")],
+                    else: [rune("WieldItem")]
+                }]
             /**
             { "character", character_id },
             { "itype", itype_id },
+            character / item to wield
              */
         },
+        WieldItem: defObj,
+        StowItem: defObj,
         WearItem: {
             base_setting: {
                 eoc_type: "EVENT",
@@ -261,6 +279,7 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             /**
             { "character", character_id },
             { "itype", itype_id },
+            character / item to wield
              */
         },
         MoveStatus: defObj,

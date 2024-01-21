@@ -55,21 +55,33 @@ export class EventManager {
         }
         return json;
     }
-    /**添加事件 */
+    /**添加事件  
+     * @param hook - 触发时机
+     * @param weight - 权重 越大优先级越高
+     * @param effects - 触发效果
+     */
     addEvent(hook:AnyHook|AnyString,weight:number,effects:EocEffect[]){
         this.verifyHook(hook);
         this._effectsMap[hook] = this._effectsMap[hook]??[];
         const list = this._effectsMap[hook];
         list?.push({effects,weight})
     }
-    /**添加调用eocid事件 */
+    /**添加调用eocid事件  
+     * @param hook - 触发时机
+     * @param weight - 权重 越大优先级越高
+     * @param eocids - 触发效果id
+     */
     addInvokeID(hook:AnyHook|AnyString,weight:number,...eocids:EocID[]){
         this.verifyHook(hook);
         this._effectsMap[hook] = this._effectsMap[hook]??[];
         const list = this._effectsMap[hook];
         list?.push({effects:[{run_eocs:eocids}],weight})
     }
-    /**添加调用eoc事件 */
+    /**添加调用eoc事件  
+     * @param hook - 触发时机
+     * @param weight - 权重 越大优先级越高
+     * @param eocs - 触发效果对象
+     */
     addInvokeEoc(hook:AnyHook|AnyString,weight:number,...eocs:Eoc[]){
         return this.addInvokeID(hook,weight,...eocs.map((item)=>item.id));
     }
