@@ -38,6 +38,7 @@ export const CharHookList = [
     "WieldItem"                 ,//手持非空物品
     "StowItem"                  ,//收回物品/手持空物品
     "WearItem"                  ,//穿戴物品
+    "EatItem"                   ,//吃下物品
 ] as const;
 /**任何角色事件  
  * u为角色 n未定义  
@@ -323,6 +324,17 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             { "itype", itype_id },
             character / item to wield
              */
+        },
+        EatItem:{
+            base_setting: {
+                eoc_type: "EVENT",
+                required_event: "character_eats_item"
+            }
+            /**
+            { "character", character_id },
+            { "itype", itype_id },
+            character / NONE
+            */
         },
         MoveStatus:defObj,
         IdleStatus:defObj,

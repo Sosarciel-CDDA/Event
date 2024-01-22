@@ -34,6 +34,7 @@ exports.CharHookList = [
     "WieldItem", //手持非空物品
     "StowItem", //收回物品/手持空物品
     "WearItem", //穿戴物品
+    "EatItem", //吃下物品
 ];
 /**全局事件列表 列表 */
 exports.GlobalHookList = [
@@ -281,6 +282,17 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             { "itype", itype_id },
             character / item to wield
              */
+        },
+        EatItem: {
+            base_setting: {
+                eoc_type: "EVENT",
+                required_event: "character_eats_item"
+            }
+            /**
+            { "character", character_id },
+            { "itype", itype_id },
+            character / NONE
+            */
         },
         MoveStatus: defObj,
         IdleStatus: defObj,
