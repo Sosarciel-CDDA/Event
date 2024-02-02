@@ -1,4 +1,4 @@
-import { Eoc, EocEffect, EocID, EocType } from "cdda-schema";
+import { BoolObj, Eoc, EocEffect, EocID, EocType } from "cdda-schema";
 
 //Interactive
 /**角色互动事件 列表 */
@@ -73,6 +73,8 @@ export type HookObj = {
     base_setting:{
         /**eoc类型 */
         eoc_type: EocType;
+        /**条件 */
+        condition?:BoolObj;
         /**event依赖 */
         required_event?: string;
         /**刷新间隔/秒 */

@@ -1,4 +1,4 @@
-import { EocEffect, EocType } from "cdda-schema";
+import { BoolObj, EocEffect, EocType } from "cdda-schema";
 /**角色互动事件 列表 */
 export declare const InteractHookList: readonly ["TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack"];
 /**角色互动事件
@@ -29,6 +29,8 @@ export type HookObj = {
     base_setting: {
         /**eoc类型 */
         eoc_type: EocType;
+        /**条件 */
+        condition?: BoolObj;
         /**event依赖 */
         required_event?: string;
         /**刷新间隔/秒 */

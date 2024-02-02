@@ -4,6 +4,7 @@ import * as  fs from 'fs';
 import { EventManager } from "./EventManager";
 import { AnyHook } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
+import { HookObj } from "./EventInterface";
 
 
 /**数据管理器 */
@@ -68,6 +69,11 @@ export class DataManager{
     async saveToFile(filePath:string,obj:JToken){
         if(this._outPath==null) return;
         return UtilFT.writeJSONFile(path.join(this._outPath,filePath),obj);
+    }
+    /**添加自定义的Hook */
+    addHook(hook:string,eoc:HookObj){
+        if(this._em===undefined) throw "未定义事件框架ID前缀"
+        this._em.addHook(hook,eoc);
     }
     /**添加事件 */
     addEvent(hook: AnyHook, weight: number, effects: EocEffect[]): void {

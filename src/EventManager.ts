@@ -44,7 +44,7 @@ export class EventManager {
                     mergeeffects.push(e)
             })
 
-            const eoc = {
+            const eoc:Eoc = {
                 type:"effect_on_condition",
                 ...hookObj.base_setting,
                 id:`${this._prefix}_${key}_EVENT` as EocID,

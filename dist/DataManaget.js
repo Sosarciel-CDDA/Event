@@ -67,6 +67,12 @@ class DataManager {
             return;
         return utils_1.UtilFT.writeJSONFile(path.join(this._outPath, filePath), obj);
     }
+    /**添加自定义的Hook */
+    addHook(hook, eoc) {
+        if (this._em === undefined)
+            throw "未定义事件框架ID前缀";
+        this._em.addHook(hook, eoc);
+    }
     /**添加事件 */
     addEvent(hook, weight, effects) {
         if (this._em === undefined)

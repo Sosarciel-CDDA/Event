@@ -2,6 +2,7 @@ import { JObject, JToken } from "@zwa73/utils";
 import { EventManager } from "./EventManager";
 import { AnyHook } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
+import { HookObj } from "./EventInterface";
 /**数据管理器 */
 export declare class DataManager {
     /**资源目录 ├ ─ └
@@ -40,6 +41,8 @@ export declare class DataManager {
      * @param obj      - 输出对象
      */
     saveToFile(filePath: string, obj: JToken): Promise<void>;
+    /**添加自定义的Hook */
+    addHook(hook: string, eoc: HookObj): void;
     /**添加事件 */
     addEvent(hook: AnyHook, weight: number, effects: EocEffect[]): void;
     /**添加调用eocid事件 */
