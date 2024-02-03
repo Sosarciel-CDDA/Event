@@ -6,7 +6,7 @@ export declare const InteractHookList: readonly ["TryMeleeAtkChar", "TryMeleeAtk
  */
 export type InteractHook = typeof InteractHookList[number];
 /**任何角色事件 列表*/
-export declare const CharHookList: readonly ["TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack", "Init", "Update", "SlowUpdate", "TakeDamage", "DeathPrev", "Death", "EnterBattle", "LeaveBattle", "BattleUpdate", "NonBattleUpdate", "MoveStatus", "IdleStatus", "AttackStatus", "WieldItemRaw", "WieldItem", "StowItem", "WearItem", "EatItem"];
+export declare const CharHookList: readonly ["TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack", "Init", "Update", "NpcUpdate", "SlowUpdate", "TakeDamage", "DeathPrev", "Death", "EnterBattle", "LeaveBattle", "BattleUpdate", "NonBattleUpdate", "MoveStatus", "IdleStatus", "AttackStatus", "WieldItemRaw", "WieldItem", "StowItem", "WearItem", "EatItem"];
 /**任何角色事件
  * u为角色 n未定义
  */
@@ -18,7 +18,7 @@ export declare const GlobalHookList: readonly ["AvatarMove", "AvatarUpdate", "Ga
  */
 export type GlobalHook = typeof GlobalHookList[number];
 /**任何事件 列表 */
-export declare const AnyEventTypeList: readonly ["AvatarMove", "AvatarUpdate", "GameBegin", "TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack", "Init", "Update", "SlowUpdate", "TakeDamage", "DeathPrev", "Death", "EnterBattle", "LeaveBattle", "BattleUpdate", "NonBattleUpdate", "MoveStatus", "IdleStatus", "AttackStatus", "WieldItemRaw", "WieldItem", "StowItem", "WearItem", "EatItem"];
+export declare const AnyEventTypeList: readonly ["AvatarMove", "AvatarUpdate", "GameBegin", "TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack", "Init", "Update", "NpcUpdate", "SlowUpdate", "TakeDamage", "DeathPrev", "Death", "EnterBattle", "LeaveBattle", "BattleUpdate", "NonBattleUpdate", "MoveStatus", "IdleStatus", "AttackStatus", "WieldItemRaw", "WieldItem", "StowItem", "WearItem", "EatItem"];
 /**任何事件
  * u n 均未定义
  */
@@ -51,4 +51,4 @@ export type HookObj = {
  * @param battleDur     - 战斗持续时间
  * @param slowCounter   - 慢速刷新间隔
  */
-export declare function genDefineHookMap(prefix: string, statusDur?: number, battleDur?: number, slowCounter?: number): Record<"TryMeleeAtkChar" | "TryMeleeAtkMon" | "TryRangeAtkChar" | "TryRangeAtkMon" | "TryMeleeAttack" | "TryRangeAttack" | "TryAttack" | "SucessMeleeAttack" | "MissMeleeAttack" | "Init" | "Update" | "SlowUpdate" | "TakeDamage" | "DeathPrev" | "Death" | "EnterBattle" | "LeaveBattle" | "BattleUpdate" | "NonBattleUpdate" | "MoveStatus" | "IdleStatus" | "AttackStatus" | "WieldItemRaw" | "WieldItem" | "StowItem" | "WearItem" | "EatItem" | "AvatarMove" | "AvatarUpdate" | "GameBegin", HookObj>;
+export declare function genDefineHookMap(prefix: string, statusDur?: number, battleDur?: number, slowCounter?: number): Record<"TryMeleeAtkChar" | "TryMeleeAtkMon" | "TryRangeAtkChar" | "TryRangeAtkMon" | "TryMeleeAttack" | "TryRangeAttack" | "TryAttack" | "SucessMeleeAttack" | "MissMeleeAttack" | "Init" | "Update" | "NpcUpdate" | "SlowUpdate" | "TakeDamage" | "DeathPrev" | "Death" | "EnterBattle" | "LeaveBattle" | "BattleUpdate" | "NonBattleUpdate" | "MoveStatus" | "IdleStatus" | "AttackStatus" | "WieldItemRaw" | "WieldItem" | "StowItem" | "WearItem" | "EatItem" | "AvatarMove" | "AvatarUpdate" | "GameBegin", HookObj>;

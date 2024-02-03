@@ -23,6 +23,7 @@ export const CharHookList = [
     ...InteractHookList         ,//
     "Init"                      ,//初始化
     "Update"                    ,//刷新
+    "NpcUpdate"                 ,//Npc刷新
     "SlowUpdate"                ,//慢速秒刷新
     "TakeDamage"                ,//受到伤害
     "DeathPrev"                 ,//死亡前 恢复生命将自动阻止死亡
@@ -255,6 +256,9 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
                 then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
             }],
             after_effects:[{
+                if:"u_is_npc",
+                then:[rune("NpcUpdate")],
+            },{
                 if:{math:[uv("inBattle"),">","0"]},
                 then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
                     if:{math:[uv("inBattle"),"<=","0"]},
@@ -284,6 +288,7 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             }]
         },
         Init:defObj,
+        NpcUpdate:defObj,
         SlowUpdate:{
             base_setting: {
                 eoc_type:"RECURRING",

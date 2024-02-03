@@ -108,13 +108,13 @@ export class DataManager{
         for(let filePath in staticData){
             let obj = staticData[filePath];
             //await
-            await UtilFT.ensurePathExists(path.parse(filePath).dir);
+            await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,true);
             this.saveToFile(filePath,obj);
         }
 
         //导出共用资源
         for(const filePath in this._sharedTable){
-            await UtilFT.ensurePathExists(path.parse(filePath).dir);
+            await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,true);
             this.saveToFile(filePath,Object.values(this._sharedTable[filePath]));
         }
 
