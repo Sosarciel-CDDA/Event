@@ -108,12 +108,15 @@ export class DataManager{
         for(let filePath in staticData){
             let obj = staticData[filePath];
             //await
+            await UtilFT.ensurePathExists(path.parse(filePath).dir);
             this.saveToFile(filePath,obj);
         }
 
         //导出共用资源
-        for(const filePath in this._sharedTable)
+        for(const filePath in this._sharedTable){
+            await UtilFT.ensurePathExists(path.parse(filePath).dir);
             this.saveToFile(filePath,Object.values(this._sharedTable[filePath]));
+        }
 
         //导出event框架
         if(this._em)
