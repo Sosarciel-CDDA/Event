@@ -91,13 +91,34 @@ export type HookObj = {
     after_effects?: EocEffect[];
 }
 
+/**Hook设定 */
+export type HookOpt = {
+    /**行动状态持续时间 */
+    statusDur:number    ;
+    /**战斗持续时间 */
+    battleDur:number    ;
+    /**慢速刷新间隔 */
+    slowCounter:number  ;
+    /**启用移动状态 */
+    enableMoveStatus:boolean  ;
+}
+
 /**生成基础事件  
  * @param prefix        - 事件前缀  
- * @param statusDur     - 行动状态持续时间  
- * @param battleDur     - 战斗持续时间  
- * @param slowCounter   - 慢速刷新间隔  
+ * @param opt           - 设定  
  */
-export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCounter=60){
+export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
+    const baseSetting:HookOpt = {
+        statusDur       : 4     ,
+        battleDur       : 60    ,
+        slowCounter     : 60    ,
+        enableMoveStatus: true  ,
+    };
+    for(const k in opt)
+        (baseSetting as any)[k] = (opt[k as keyof HookOpt]??baseSetting[k as keyof HookOpt])as any
+
+    const {statusDur,battleDur,slowCounter,enableMoveStatus} = baseSetting;
+
     const eid = (id:AnyHook)=>`${prefix}_${id}_EVENT` as EocID;
     const rune = (id:AnyHook)=>({run_eocs:eid(id)});
     const uv = (id:string)=>`u_${prefix}_${id}`;
@@ -258,25 +279,27 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
             after_effects:[{
                 if:"u_is_npc",
                 then:[rune("NpcUpdate")],
-            },{
-                if:{math:[uv("inBattle"),">","0"]},
-                then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
-                    if:{math:[uv("inBattle"),"<=","0"]},
-                    then:[rune("LeaveBattle")],
-                }],
-                else:[rune("NonBattleUpdate")]
-            },{//将uvar转为全局var防止比较报错
-                set_string_var: { u_val: uv("char_preloc") },
-                target_var: { global_val: gv("char_preloc") }
-            },{//通过比较 loc字符串 检测移动
-                if:{compare_string: [
-                        { global_val: gv("char_preloc") },
-                        { mutator: "loc_relative_u", target: "(0,0,0)" }
-                    ]},
-                then:[{math:[uv("onMoveStatus"),"=","0"]}],
-                else:[{math:[uv("onMoveStatus"),"=","1"]}],
-            },//更新 loc字符串
-            {u_location_variable:{u_val:uv("char_preloc")}},
+            },
+            ...enableMoveStatus?[{
+                    if:{math:[uv("inBattle"),">","0"]},
+                    then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
+                        if:{math:[uv("inBattle"),"<=","0"]},
+                        then:[rune("LeaveBattle")],
+                    }],
+                    else:[rune("NonBattleUpdate")]
+                },{//将uvar转为全局var防止比较报错
+                    set_string_var: { u_val: uv("char_preloc") },
+                    target_var: { global_val: gv("char_preloc") }
+                },{//通过比较 loc字符串 检测移动
+                    if:{compare_string: [
+                            { global_val: gv("char_preloc") },
+                            { mutator: "loc_relative_u", target: "(0,0,0)" }
+                        ]},
+                    then:[{math:[uv("onMoveStatus"),"=","0"]}],
+                    else:[{math:[uv("onMoveStatus"),"=","1"]}],
+                },//更新 loc字符串
+                {u_location_variable:{u_val:uv("char_preloc")}}
+            ] as EocEffect[]:[],
             {//触发互斥状态
                 if:{math:[uv("notIdleOrMoveStatus"),"<=","0"]},
                 then:[{
@@ -347,5 +370,6 @@ export function genDefineHookMap(prefix:string,statusDur=4,battleDur=60,slowCoun
         IdleStatus:defObj,
         AttackStatus:defObj,
     };
+    
     return hookMap;
 }

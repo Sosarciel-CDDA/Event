@@ -50,11 +50,18 @@ exports.AnyEventTypeList = [
 ];
 /**生成基础事件
  * @param prefix        - 事件前缀
- * @param statusDur     - 行动状态持续时间
- * @param battleDur     - 战斗持续时间
- * @param slowCounter   - 慢速刷新间隔
+ * @param opt           - 设定
  */
-function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 60) {
+function genDefineHookMap(prefix, opt) {
+    const baseSetting = {
+        statusDur: 4,
+        battleDur: 60,
+        slowCounter: 60,
+        enableMoveStatus: true,
+    };
+    for (const k in opt)
+        baseSetting[k] = (opt[k] ?? baseSetting[k]);
+    const { statusDur, battleDur, slowCounter, enableMoveStatus } = baseSetting;
     const eid = (id) => `${prefix}_${id}_EVENT`;
     const rune = (id) => ({ run_eocs: eid(id) });
     const uv = (id) => `u_${prefix}_${id}`;
@@ -214,25 +221,27 @@ function genDefineHookMap(prefix, statusDur = 4, battleDur = 60, slowCounter = 6
             after_effects: [{
                     if: "u_is_npc",
                     then: [rune("NpcUpdate")],
-                }, {
-                    if: { math: [uv("inBattle"), ">", "0"] },
-                    then: [rune("BattleUpdate"), { math: [uv("inBattle"), "-=", "1"] }, {
-                            if: { math: [uv("inBattle"), "<=", "0"] },
-                            then: [rune("LeaveBattle")],
-                        }],
-                    else: [rune("NonBattleUpdate")]
-                }, {
-                    set_string_var: { u_val: uv("char_preloc") },
-                    target_var: { global_val: gv("char_preloc") }
-                }, {
-                    if: { compare_string: [
-                            { global_val: gv("char_preloc") },
-                            { mutator: "loc_relative_u", target: "(0,0,0)" }
-                        ] },
-                    then: [{ math: [uv("onMoveStatus"), "=", "0"] }],
-                    else: [{ math: [uv("onMoveStatus"), "=", "1"] }],
-                }, //更新 loc字符串
-                { u_location_variable: { u_val: uv("char_preloc") } },
+                },
+                ...enableMoveStatus ? [{
+                        if: { math: [uv("inBattle"), ">", "0"] },
+                        then: [rune("BattleUpdate"), { math: [uv("inBattle"), "-=", "1"] }, {
+                                if: { math: [uv("inBattle"), "<=", "0"] },
+                                then: [rune("LeaveBattle")],
+                            }],
+                        else: [rune("NonBattleUpdate")]
+                    }, {
+                        set_string_var: { u_val: uv("char_preloc") },
+                        target_var: { global_val: gv("char_preloc") }
+                    }, {
+                        if: { compare_string: [
+                                { global_val: gv("char_preloc") },
+                                { mutator: "loc_relative_u", target: "(0,0,0)" }
+                            ] },
+                        then: [{ math: [uv("onMoveStatus"), "=", "0"] }],
+                        else: [{ math: [uv("onMoveStatus"), "=", "1"] }],
+                    }, //更新 loc字符串
+                    { u_location_variable: { u_val: uv("char_preloc") } }
+                ] : [],
                 {
                     if: { math: [uv("notIdleOrMoveStatus"), "<=", "0"] },
                     then: [{

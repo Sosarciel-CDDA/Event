@@ -1,6 +1,6 @@
 import { JObject, JToken } from "@zwa73/utils";
 import { EventManager } from "./EventManager";
-import { AnyHook } from "./EventInterface";
+import { AnyHook, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 import { HookObj } from "./EventInterface";
 /**数据管理器 */
@@ -23,7 +23,7 @@ export declare class DataManager {
      * @param outPath  - 输出数据路径 默认无输出
      * @param emPrefix - 事件框架前缀 未设置则无事建框架
      */
-    constructor(dataPath?: string, outPath?: string, emPrefix?: string);
+    constructor(dataPath?: string, outPath?: string, emPrefix?: string, opt?: Partial<HookOpt>);
     /**添加共享资源 同filepath+key会覆盖
      * 出现与原数据不同的数据时会提示
      * @param key      - 共享资源的键
@@ -43,6 +43,8 @@ export declare class DataManager {
     saveToFile(filePath: string, obj: JToken): Promise<void>;
     /**添加自定义的Hook */
     addHook(hook: string, eoc: HookObj): void;
+    /**获得Hook设定 */
+    getHookObj(hook: string): HookObj;
     /**添加事件 */
     addEvent(hook: AnyHook, weight: number, effects: EocEffect[]): void;
     /**添加调用eocid事件 */

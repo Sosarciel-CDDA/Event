@@ -1,6 +1,6 @@
 
 import { AnyString, JObject, UtilFT, UtilFunc } from "@zwa73/utils";
-import { AnyHook, genDefineHookMap, GlobalHook, HookObj} from "./EventInterface";
+import { AnyHook, genDefineHookMap, GlobalHook, HookObj, HookOpt} from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 
 
@@ -15,8 +15,8 @@ export class EventManager {
     private _hookMap:Record<AnyHook|AnyString,HookObj>;
     private _effectsMap:Partial<Record<AnyHook|AnyString,EventEffect[]>> = {};
     private _prefix:string;
-    constructor(prefix:string){
-        this._hookMap=genDefineHookMap(prefix);
+    constructor(prefix:string,opt?:Partial<HookOpt>){
+        this._hookMap=genDefineHookMap(prefix,opt);
         this._prefix = prefix;
     }
     /**导出 */
@@ -88,6 +88,11 @@ export class EventManager {
     /**添加自定义的Hook */
     addHook(hook:string,eoc:HookObj){
         this._hookMap[hook] = eoc;
+    }
+    /**获得hook设定 */
+    getHookObj(hook:string){
+        this.verifyHook(hook);
+        return this._hookMap[hook];
     }
     /**验证hook是否存在 */
     private verifyHook(hook:string){

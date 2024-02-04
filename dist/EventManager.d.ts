@@ -1,11 +1,11 @@
 import { AnyString, JObject } from "@zwa73/utils";
-import { AnyHook, HookObj } from "./EventInterface";
+import { AnyHook, HookObj, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 export declare class EventManager {
     private _hookMap;
     private _effectsMap;
     private _prefix;
-    constructor(prefix: string);
+    constructor(prefix: string, opt?: Partial<HookOpt>);
     /**导出 */
     build(): JObject[];
     /**添加事件
@@ -28,6 +28,8 @@ export declare class EventManager {
     addInvokeEoc(hook: AnyHook | AnyString, weight: number, ...eocs: Eoc[]): void;
     /**添加自定义的Hook */
     addHook(hook: string, eoc: HookObj): void;
+    /**获得hook设定 */
+    getHookObj(hook: string): HookObj;
     /**验证hook是否存在 */
     private verifyHook;
     /**获取前缀 */

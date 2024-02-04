@@ -45,10 +45,19 @@ export type HookObj = {
     /**运行此事件后将会附带调用的EocEffect */
     after_effects?: EocEffect[];
 };
+/**Hook设定 */
+export type HookOpt = {
+    /**行动状态持续时间 */
+    statusDur: number;
+    /**战斗持续时间 */
+    battleDur: number;
+    /**慢速刷新间隔 */
+    slowCounter: number;
+    /**启用移动状态 */
+    enableMoveStatus: boolean;
+};
 /**生成基础事件
  * @param prefix        - 事件前缀
- * @param statusDur     - 行动状态持续时间
- * @param battleDur     - 战斗持续时间
- * @param slowCounter   - 慢速刷新间隔
+ * @param opt           - 设定
  */
-export declare function genDefineHookMap(prefix: string, statusDur?: number, battleDur?: number, slowCounter?: number): Record<"TryMeleeAtkChar" | "TryMeleeAtkMon" | "TryRangeAtkChar" | "TryRangeAtkMon" | "TryMeleeAttack" | "TryRangeAttack" | "TryAttack" | "SucessMeleeAttack" | "MissMeleeAttack" | "Init" | "Update" | "NpcUpdate" | "SlowUpdate" | "TakeDamage" | "DeathPrev" | "Death" | "EnterBattle" | "LeaveBattle" | "BattleUpdate" | "NonBattleUpdate" | "MoveStatus" | "IdleStatus" | "AttackStatus" | "WieldItemRaw" | "WieldItem" | "StowItem" | "WearItem" | "EatItem" | "AvatarMove" | "AvatarUpdate" | "GameBegin", HookObj>;
+export declare function genDefineHookMap(prefix: string, opt?: Partial<HookOpt>): Record<"TryMeleeAtkChar" | "TryMeleeAtkMon" | "TryRangeAtkChar" | "TryRangeAtkMon" | "TryMeleeAttack" | "TryRangeAttack" | "TryAttack" | "SucessMeleeAttack" | "MissMeleeAttack" | "Init" | "Update" | "NpcUpdate" | "SlowUpdate" | "TakeDamage" | "DeathPrev" | "Death" | "EnterBattle" | "LeaveBattle" | "BattleUpdate" | "NonBattleUpdate" | "MoveStatus" | "IdleStatus" | "AttackStatus" | "WieldItemRaw" | "WieldItem" | "StowItem" | "WearItem" | "EatItem" | "AvatarMove" | "AvatarUpdate" | "GameBegin", HookObj>;

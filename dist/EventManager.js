@@ -6,8 +6,8 @@ class EventManager {
     _hookMap;
     _effectsMap = {};
     _prefix;
-    constructor(prefix) {
-        this._hookMap = (0, EventInterface_1.genDefineHookMap)(prefix);
+    constructor(prefix, opt) {
+        this._hookMap = (0, EventInterface_1.genDefineHookMap)(prefix, opt);
         this._prefix = prefix;
     }
     /**导出 */
@@ -76,6 +76,11 @@ class EventManager {
     /**添加自定义的Hook */
     addHook(hook, eoc) {
         this._hookMap[hook] = eoc;
+    }
+    /**获得hook设定 */
+    getHookObj(hook) {
+        this.verifyHook(hook);
+        return this._hookMap[hook];
     }
     /**验证hook是否存在 */
     verifyHook(hook) {

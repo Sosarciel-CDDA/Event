@@ -2,7 +2,7 @@ import { JArray, JObject, JToken, UtilFT } from "@zwa73/utils";
 import * as path from 'path';
 import * as  fs from 'fs';
 import { EventManager } from "./EventManager";
-import { AnyHook } from "./EventInterface";
+import { AnyHook, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 import { HookObj } from "./EventInterface";
 
@@ -30,12 +30,12 @@ export class DataManager{
      * @param outPath  - 输出数据路径 默认无输出  
      * @param emPrefix - 事件框架前缀 未设置则无事建框架
      */
-    constructor(dataPath?:string,outPath?:string,emPrefix?:string){
+    constructor(dataPath?:string,outPath?:string,emPrefix?:string,opt?:Partial<HookOpt>){
         //初始化资源io路径
         this._outPath  = outPath;
         this._dataPath = dataPath;
         if(emPrefix!=null)
-            this._em = new EventManager(emPrefix)
+            this._em = new EventManager(emPrefix,opt);
     }
     /**添加共享资源 同filepath+key会覆盖  
      * 出现与原数据不同的数据时会提示  
@@ -74,6 +74,11 @@ export class DataManager{
     addHook(hook:string,eoc:HookObj){
         if(this._em===undefined) throw "未定义事件框架ID前缀"
         this._em.addHook(hook,eoc);
+    }
+    /**获得Hook设定 */
+    getHookObj(hook:string){
+        if(this._em===undefined) throw "未定义事件框架ID前缀"
+        return this._em.getHookObj(hook);
     }
     /**添加事件 */
     addEvent(hook: AnyHook, weight: number, effects: EocEffect[]): void {
