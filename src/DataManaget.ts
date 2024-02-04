@@ -113,6 +113,9 @@ export class DataManager{
         for(let filePath in staticData){
             let obj = staticData[filePath];
             //await
+            //console.log(this._outPath)
+            //console.log(filePath)
+            //console.log(path.parse(path.join(this._outPath,filePath)).dir)
             await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,true);
             this.saveToFile(filePath,obj);
         }

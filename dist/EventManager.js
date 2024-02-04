@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventManager = void 0;
+const utils_1 = require("@zwa73/utils");
 const EventInterface_1 = require("./EventInterface");
 class EventManager {
     _hookMap;
@@ -20,18 +21,41 @@ class EventManager {
             //加入effect
             let elist = this._effectsMap[fixkey] || [];
             elist.sort((a, b) => b.weight - a.weight);
+            //格式化为effect
             const eventeffects = [];
             elist.forEach((e) => eventeffects.push(...e.effects));
-            const mergeeffects = [];
-            eventeffects.forEach((e) => {
-                const lastobj = mergeeffects[mergeeffects.length - 1];
-                if (typeof lastobj == "object" && 'run_eocs' in lastobj && Array.isArray(lastobj.run_eocs) &&
-                    typeof e == "object" && 'run_eocs' in e && Array.isArray(e.run_eocs)) {
-                    lastobj.run_eocs.push(...e.run_eocs);
-                }
-                else
-                    mergeeffects.push(e);
-            });
+            //合并if
+            function mergeIf(effects) {
+                const merges = [];
+                effects.forEach((curre) => {
+                    const laste = merges[merges.length - 1];
+                    if (typeof laste == "object" && 'if' in laste && Array.isArray(laste.then) &&
+                        typeof curre == "object" && 'if' in curre && Array.isArray(curre.then) &&
+                        (0, utils_1.stringifyJToken)(laste.if) == (0, utils_1.stringifyJToken)(curre.if)) {
+                        laste.then.push(...curre.then);
+                        laste.then = mergeRuneocs(laste.then);
+                    }
+                    else
+                        merges.push(curre);
+                });
+                return merges;
+            }
+            //合并runeocs
+            function mergeRuneocs(effects) {
+                const merges = [];
+                effects.forEach((curre) => {
+                    const laste = merges[merges.length - 1];
+                    if (typeof laste == "object" && 'run_eocs' in laste && Array.isArray(laste.run_eocs) &&
+                        typeof curre == "object" && 'run_eocs' in curre && Array.isArray(curre.run_eocs)) {
+                        laste.run_eocs.push(...curre.run_eocs);
+                    }
+                    else
+                        merges.push(curre);
+                });
+                return merges;
+            }
+            //合并
+            const mergeeffects = mergeRuneocs(mergeIf(eventeffects));
             const eoc = {
                 type: "effect_on_condition",
                 ...hookObj.base_setting,
