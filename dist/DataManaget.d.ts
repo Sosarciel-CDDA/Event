@@ -31,11 +31,11 @@ export declare class DataManager {
      * @param filePath - 输出路径
      */
     addSharedRes(key: string, val: JObject, filePath: string, ...filePaths: string[]): void;
-    /**添加静态资源
+    /**添加资源
      * @param arr      - 资源对象数组
      * @param filePath - 输出路径
      */
-    addStaticData(arr: JObject[], filePath: string, ...filePaths: string[]): void;
+    addData(arr: JObject[], filePath: string, ...filePaths: string[]): void;
     /**输出数据到主目录
      * @param filePath - 输出路径
      * @param obj      - 输出对象

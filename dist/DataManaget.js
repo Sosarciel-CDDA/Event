@@ -51,11 +51,11 @@ class DataManager {
                 console.log(`addSharedRes 出现了一个不相同的数据 \n原数据:${JSON.stringify(oval)}\n新数据:${JSON.stringify(val)}`);
         }
     }
-    /**添加静态资源
+    /**添加资源
      * @param arr      - 资源对象数组
      * @param filePath - 输出路径
      */
-    addStaticData(arr, filePath, ...filePaths) {
+    addData(arr, filePath, ...filePaths) {
         this._staticTable[path.join(filePath, ...filePaths)] = arr;
     }
     /**输出数据到主目录
