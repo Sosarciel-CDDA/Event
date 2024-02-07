@@ -103,6 +103,7 @@ class DataManager {
     async saveAllData() {
         if (this._outPath == null)
             return;
+        await utils_1.UtilFT.ensurePathExists(this._outPath, true);
         if (this._dataPath != null) {
             //复制静态数据
             const staticDataPath = path.join(this._dataPath, "StaticData");

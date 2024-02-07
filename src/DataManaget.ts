@@ -104,6 +104,7 @@ export class DataManager{
             //复制静态数据
             const staticDataPath = path.join(this._dataPath,"StaticData");
             await UtilFT.ensurePathExists(staticDataPath,true);
+            await UtilFT.ensurePathExists(this._outPath,true);
             //await
             fs.promises.cp(staticDataPath,this._outPath,{ recursive: true });
         }
