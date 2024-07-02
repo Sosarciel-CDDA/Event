@@ -103,8 +103,8 @@ export class DataManager{
         if(this._dataPath!=null){
             //复制静态数据
             const staticDataPath = path.join(this._dataPath,"StaticData");
-            await UtilFT.ensurePathExists(staticDataPath,true);
-            await UtilFT.ensurePathExists(this._outPath,true);
+            await UtilFT.ensurePathExists(staticDataPath,{dir:true});
+            await UtilFT.ensurePathExists(this._outPath,{dir:true});
             //await
             fs.promises.cp(staticDataPath,this._outPath,{ recursive: true });
         }
@@ -117,13 +117,13 @@ export class DataManager{
             //console.log(this._outPath)
             //console.log(filePath)
             //console.log(path.parse(path.join(this._outPath,filePath)).dir)
-            await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,true);
+            await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
             this.saveToFile(filePath,obj);
         }
 
         //导出共用资源
         for(const filePath in this._sharedTable){
-            await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,true);
+            await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
             this.saveToFile(filePath,Object.values(this._sharedTable[filePath]));
         }
 

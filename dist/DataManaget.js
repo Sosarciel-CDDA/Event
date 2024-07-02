@@ -103,11 +103,11 @@ class DataManager {
     async saveAllData() {
         if (this._outPath == null)
             return;
-        await utils_1.UtilFT.ensurePathExists(this._outPath, true);
         if (this._dataPath != null) {
             //复制静态数据
             const staticDataPath = path.join(this._dataPath, "StaticData");
-            await utils_1.UtilFT.ensurePathExists(staticDataPath, true);
+            await utils_1.UtilFT.ensurePathExists(staticDataPath, { dir: true });
+            await utils_1.UtilFT.ensurePathExists(this._outPath, { dir: true });
             //await
             fs.promises.cp(staticDataPath, this._outPath, { recursive: true });
         }
@@ -119,12 +119,12 @@ class DataManager {
             //console.log(this._outPath)
             //console.log(filePath)
             //console.log(path.parse(path.join(this._outPath,filePath)).dir)
-            await utils_1.UtilFT.ensurePathExists(path.parse(path.join(this._outPath, filePath)).dir, true);
+            await utils_1.UtilFT.ensurePathExists(path.parse(path.join(this._outPath, filePath)).dir, { dir: true });
             this.saveToFile(filePath, obj);
         }
         //导出共用资源
         for (const filePath in this._sharedTable) {
-            await utils_1.UtilFT.ensurePathExists(path.parse(path.join(this._outPath, filePath)).dir, true);
+            await utils_1.UtilFT.ensurePathExists(path.parse(path.join(this._outPath, filePath)).dir, { dir: true });
             this.saveToFile(filePath, Object.values(this._sharedTable[filePath]));
         }
         //导出event框架

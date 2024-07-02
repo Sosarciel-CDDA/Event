@@ -8,7 +8,7 @@
   "description": "typescript的cddaevent快捷操作",
   "main": "index.js",
   "scripts": {
-    "compile": "npx tsc & npx tsc-alias"
+    "compile": "powershell scripts/compile"
   },
   "keywords": [
     "cdda"

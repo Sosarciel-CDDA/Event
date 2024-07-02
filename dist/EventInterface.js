@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.genDefineHookMap = exports.AnyEventTypeList = exports.GlobalHookList = exports.CharHookList = exports.InteractHookList = void 0;
+exports.AnyEventTypeList = exports.GlobalHookList = exports.CharHookList = exports.InteractHookList = void 0;
+exports.genDefineHookMap = genDefineHookMap;
 //Interactive
 /**角色互动事件 列表 */
 exports.InteractHookList = [
@@ -314,4 +315,3 @@ function genDefineHookMap(prefix, opt) {
     };
     return hookMap;
 }
-exports.genDefineHookMap = genDefineHookMap;
