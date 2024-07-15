@@ -24,7 +24,7 @@ export const CharHookList = [
     "Init"                      ,//初始化
     "Update"                    ,//刷新
     "NpcUpdate"                 ,//Npc刷新
-    "SlowUpdate"                ,//慢速秒刷新
+    "SlowUpdate"                ,//慢速刷新
     "TakeDamage"                ,//受到伤害
     "DeathPrev"                 ,//死亡前 恢复生命将自动阻止死亡
     "Death"                     ,//死亡
