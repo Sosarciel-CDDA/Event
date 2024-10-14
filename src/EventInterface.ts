@@ -26,6 +26,8 @@ export const CharHookList = [
     "NpcUpdate"                 ,//Npc刷新
     "SlowUpdate"                ,//慢速刷新
     "TakeDamage"                ,//受到伤害
+    "LowHp"                     ,//低血量 受到任意伤害后 血量若低于阈值触发
+    "NearDeath"                 ,//濒死   受到任意伤害后 血量若低于阈值触发
     "DeathPrev"                 ,//死亡前 恢复生命将自动阻止死亡
     "Death"                     ,//死亡
     "EnterBattle"               ,//进入战斗
@@ -46,11 +48,24 @@ export const CharHookList = [
  */
 export type CharHook = typeof CharHookList[number];
 
+
+/**仅Npc事件 列表 */
+export const NpcHookList = [
+    "NpcDeathPrev"              ,//死亡前 恢复生命将自动阻止死亡
+] as const;
+/**仅Npc事件  
+ * u为Npc n未定义  
+ */
+export type NpcHook = typeof NpcHookList[number];
+
+
 /**全局事件列表 列表 */
 export const GlobalHookList = [
     "AvatarMove"            ,//玩家移动
     "AvatarUpdate"          ,//玩家刷新
+    "AvatarDeathPrev"       ,//玩家死亡
     "GameBegin"             ,//每次进入游戏时
+    "GameStart"             ,//游戏第一次启动时
 ] as const;
 /**全局事件  
  * u为主角 n未定义  
@@ -61,6 +76,7 @@ export type GlobalHook = typeof GlobalHookList[number];
 export const AnyEventTypeList = [
     ...GlobalHookList  ,
     ...CharHookList    ,
+    ...NpcHookList     ,
 ] as const;
 /**任何事件  
  * u n 均未定义
@@ -89,18 +105,24 @@ export type HookObj = {
     before_effects?: EocEffect[];
     /**运行此事件后将会附带调用的EocEffect */
     after_effects?: EocEffect[];
+    /**前置的hook */
+    require_hook?:AnyHook[];
 }
 
 /**Hook设定 */
 export type HookOpt = {
-    /**行动状态持续时间 */
+    /**行动状态持续时间 默认 4 */
     statusDur:number    ;
-    /**战斗持续时间 */
+    /**战斗持续时间 默认 60 */
     battleDur:number    ;
-    /**慢速刷新间隔 */
+    /**慢速刷新间隔 默认 60 */
     slowCounter:number  ;
-    /**启用移动状态 */
+    /**启用移动状态 默认 true */
     enableMoveStatus:boolean  ;
+    /**低血量事件血量阈值 默认 33% */
+    lowHpThreshold:number  ;
+    /**濒死事件血量阈值 默认 10% */
+    nearDeathThreshold:number  ;
 }
 
 /**生成基础事件  
@@ -108,16 +130,16 @@ export type HookOpt = {
  * @param opt           - 设定  
  */
 export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
-    const baseSetting:HookOpt = {
-        statusDur       : 4     ,
-        battleDur       : 60    ,
-        slowCounter     : 60    ,
-        enableMoveStatus: true  ,
-    };
-    for(const k in opt)
-        (baseSetting as any)[k] = (opt[k as keyof HookOpt]??baseSetting[k as keyof HookOpt])as any
+    const baseSetting:HookOpt = Object.assign({
+        statusDur           : 4     ,
+        battleDur           : 60    ,
+        slowCounter         : 60    ,
+        enableMoveStatus    : true  ,
+        lowHpThreshold      : 0.33  ,
+        nearDeathThreshold  : 0.1   ,
+    },opt??{});
 
-    const {statusDur,battleDur,slowCounter,enableMoveStatus} = baseSetting;
+    const {statusDur,battleDur,slowCounter,enableMoveStatus,lowHpThreshold,nearDeathThreshold} = baseSetting;
 
     const eid = (id:AnyHook)=>`${prefix}_${id}_EVENT` as EocID;
     const rune = (id:AnyHook)=>({run_eocs:eid(id)});
@@ -125,14 +147,23 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
     const nv = (id:string)=>`n_${prefix}_${id}`;
     const gv = (id:string)=>`${prefix}_${id}`;
 
-    //默认Hook
-    const defObj:HookObj={
+    /**默认Hook */
+    const DefHook:HookObj={
         base_setting: {
             eoc_type: "ACTIVATION"
         }
     }
+    /**需求前置事件的默认hook */
+    const RequireDefObj = (...reqs:AnyHook[])=>({...DefHook,require_hook:reqs});
+
     //预定义的Hook
     const hookMap:Record<AnyHook,HookObj>={
+        GameStart:{
+            base_setting: {
+                eoc_type: "EVENT",
+                required_event: "game_start"
+            }
+        },
         GameBegin:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -147,13 +178,31 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             after_effects:[{
                 if:{math:[uv("inBattle"),"<=","0"]},
                 then:[rune("EnterBattle")],
-            },{math:[uv("inBattle"),"=",`${battleDur}`]}]
+            },
+            {math:[uv("inBattle"),"=",`${battleDur}`]},
+            {
+                if:{or:[
+                    {math:["u_hp('head') / u_hp_max('head')"  ,"<=",`${lowHpThreshold}`]},
+                    {math:["u_hp('torso') / u_hp_max('torso')","<=",`${lowHpThreshold}`]},
+                ]},
+                then:[rune("LowHp")],
+            },
+            {
+                if:{or:[
+                    {math:["u_hp('head') / u_hp_max('head')"  ,"<=",`${nearDeathThreshold}`]},
+                    {math:["u_hp('torso') / u_hp_max('torso')","<=",`${nearDeathThreshold}`]},
+                ]},
+                then:[rune("NearDeath")],
+            },
+            ]
             /*
             { "character", character_id }
             { "damage", int }
             character / NONE
 	        */
         },
+        LowHp:RequireDefObj('TakeDamage'),
+        NearDeath:RequireDefObj('TakeDamage'),
         TryMeleeAtkChar:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -193,12 +242,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 else:[rune("MissMeleeAttack")],
             }]
         },
-        SucessMeleeAttack:{
-            base_setting:defObj.base_setting
-        },
-        MissMeleeAttack:{
-            base_setting:defObj.base_setting
-        },
+        SucessMeleeAttack:RequireDefObj('TryMeleeAttack'),
+        MissMeleeAttack:RequireDefObj('TryMeleeAttack'),
         TryRangeAtkChar:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -227,39 +272,49 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             */
         },
         TryRangeAttack:{
-            base_setting: {
-                eoc_type: "ACTIVATION"
-            },
+            ...RequireDefObj('TryRangeAtkChar','TryRangeAtkMon'),
             after_effects:[rune("TryAttack")]
         },
         TryAttack:{
-            base_setting:defObj.base_setting,
+            ...RequireDefObj('TryRangeAttack','TryMeleeAttack'),
             before_effects:[{math:[uv("notIdleOrMoveStatus"),"=",`${statusDur}`]}],
             after_effects:[{
                 if:{math:[uv("inBattle"),"<=","0"]},
                 then:[rune("EnterBattle")],
             },{math:[uv("inBattle"),"=",`${battleDur}`]}]
         },
-        EnterBattle:defObj,
-        LeaveBattle:defObj,
-        BattleUpdate:defObj,
-        NonBattleUpdate:defObj,
-        DeathPrev:{
+        EnterBattle:RequireDefObj('TryAttack'),
+        LeaveBattle:RequireDefObj('Update'),
+        BattleUpdate:RequireDefObj('Update'),
+        NonBattleUpdate:RequireDefObj('Update'),
+        NpcDeathPrev:{
             base_setting: {
                 eoc_type: "EVENT",
-                required_event: "character_dies"
+                required_event: "character_dies",
+                condition:"u_is_npc",
             },
-            after_effects:[{
-                if:{or:[{math:["u_hp('head')","<=","0"]},{math:["u_hp('torso')","<=","0"]}]},
-                then:[rune("Death")],
-                else:["u_prevent_death"]
-            }]
+            after_effects:[rune('DeathPrev')],
             /**
             { "character", character_id },
             character / NONE
             */
         },
-        Death:defObj,
+        AvatarDeathPrev:{
+            base_setting: {
+                eoc_type: "PREVENT_DEATH",
+                condition:"u_is_avatar",
+            },
+            after_effects:[rune('DeathPrev')]
+        },
+        DeathPrev:{
+            ...RequireDefObj('NpcDeathPrev','AvatarDeathPrev'),
+            after_effects:[{
+                if:{or:[{math:["u_hp('head')","<=","0"]},{math:["u_hp('torso')","<=","0"]}]},
+                then:[rune("Death")],
+                else:["u_prevent_death"]
+            }]
+        },
+        Death:RequireDefObj('DeathPrev'),
         AvatarMove:{
             base_setting: {
                 eoc_type: "OM_MOVE"
@@ -279,6 +334,10 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             after_effects:[{
                 if:"u_is_npc",
                 then:[rune("NpcUpdate")],
+            },
+            {
+                if:"u_is_avatar",
+                then:[rune("AvatarUpdate")],
             },
             ...enableMoveStatus?[{
                     if:{math:[uv("inBattle"),">","0"]},
@@ -310,8 +369,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]
             }]
         },
-        Init:defObj,
-        NpcUpdate:defObj,
+        Init:RequireDefObj('Update'),
+        NpcUpdate:RequireDefObj('Update'),
         SlowUpdate:{
             base_setting: {
                 eoc_type:"RECURRING",
@@ -320,12 +379,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 run_for_npcs: true
             }
         },
-        AvatarUpdate:{
-            base_setting: {
-                eoc_type:"RECURRING",
-                recurrence: 1
-            }
-        },
+        AvatarUpdate:RequireDefObj('Update'),
         WieldItemRaw:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -342,8 +396,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             character / item to wield
              */
         },
-        WieldItem:defObj,
-        StowItem:defObj,
+        WieldItem:RequireDefObj('WieldItemRaw'),
+        StowItem:RequireDefObj('WieldItemRaw'),
         WearItem:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -366,10 +420,9 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             character / NONE
             */
         },
-        MoveStatus:defObj,
-        IdleStatus:defObj,
-        AttackStatus:defObj,
+        MoveStatus:RequireDefObj('Update'),
+        IdleStatus:RequireDefObj('Update'),
+        AttackStatus:RequireDefObj('Update'),
     };
-    
     return hookMap;
 }

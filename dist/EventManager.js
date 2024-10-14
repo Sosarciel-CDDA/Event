@@ -13,13 +13,13 @@ class EventManager {
     }
     /**导出 */
     build() {
-        const json = [];
+        const jsonMap = {};
         //加入effect
         for (const key in this._hookMap) {
             const fixkey = key;
             const hookObj = this._hookMap[fixkey];
             //加入effect
-            let elist = this._effectsMap[fixkey] || [];
+            const elist = this._effectsMap[fixkey] ?? [];
             elist.sort((a, b) => b.weight - a.weight);
             //格式化为effect
             const eventeffects = [];
@@ -60,12 +60,57 @@ class EventManager {
                 type: "effect_on_condition",
                 ...hookObj.base_setting,
                 id: `${this._prefix}_${key}_EVENT`,
-                effect: [...hookObj.before_effects ?? [], ...mergeeffects, ...hookObj.after_effects ?? []]
+                effect: [
+                    ...hookObj.before_effects ?? [],
+                    ...mergeeffects,
+                    ...hookObj.after_effects ?? [],
+                ],
+                "//": {
+                    isUsed: mergeeffects.length >= 1,
+                    require: hookObj.require_hook,
+                }
             };
             //整合eoc数组
-            json.push(eoc);
+            jsonMap[key] = (eoc);
         }
-        return json;
+        const vaildMap = {};
+        //删除无效eoc
+        Object.entries(jsonMap).forEach(([k, v]) => {
+            if (!v["//"].isUsed)
+                return;
+            vaildMap[k] = v;
+            const req = v["//"].require ?? [];
+            for (const hook of req)
+                vaildMap[hook] = jsonMap[hook];
+        });
+        //删除无效eoc调用
+        function delRunEocs(obj, param) {
+            //console.log(param);
+            if (typeof obj == 'string')
+                return;
+            if (typeof obj != 'object')
+                return;
+            for (const k in obj) {
+                const sobj = obj[k];
+                if (Array.isArray(sobj)) {
+                    obj[k] = sobj.filter(ssobj => {
+                        if (typeof ssobj == 'object' && 'run_eocs' in ssobj && ssobj.run_eocs == param)
+                            return false;
+                        return true;
+                    });
+                    obj[k].forEach((ssobj) => delRunEocs(ssobj, param));
+                }
+                if (typeof sobj == 'object')
+                    delRunEocs(sobj, param);
+            }
+        }
+        Object.keys(jsonMap)
+            .filter(k => !Object.keys(vaildMap).includes(k))
+            .forEach(k => delRunEocs(vaildMap, jsonMap[k].id));
+        //删除builddata
+        for (const k in vaildMap)
+            delete vaildMap[k]["//"];
+        return Object.values(vaildMap);
     }
     /**添加事件
      * @param hook - 触发时机

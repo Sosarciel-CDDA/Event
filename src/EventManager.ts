@@ -1,6 +1,5 @@
-
-import { AnyString, JObject, UtilFT, UtilFunc, stringifyJToken } from "@zwa73/utils";
-import { AnyHook, genDefineHookMap, GlobalHook, HookObj, HookOpt} from "./EventInterface";
+import { AnyString, JObject, PRecord, stringifyJToken } from "@zwa73/utils";
+import { AnyEventTypeList, AnyHook, genDefineHookMap, HookObj, HookOpt} from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 
 
@@ -21,13 +20,19 @@ export class EventManager {
     }
     /**导出 */
     build(){
-        const json:JObject[] = [];
+        const jsonMap:PRecord<AnyHook,BuildData> = {};
+        type BuildData = Eoc&{
+            "//":{
+                isUsed:boolean;
+                require?:AnyHook[];
+            }
+        };
         //加入effect
         for(const key in this._hookMap){
             const fixkey = key as AnyHook;
             const hookObj = this._hookMap[fixkey];
             //加入effect
-            let elist = this._effectsMap[fixkey]||[];
+            const elist = this._effectsMap[fixkey]??[];
             elist.sort((a,b)=>b.weight-a.weight);
 
             //格式化为effect
@@ -65,16 +70,61 @@ export class EventManager {
             //合并
             const mergeeffects = mergeRuneocs(mergeIf(eventeffects));
 
-            const eoc:Eoc = {
+            const eoc:BuildData = {
                 type:"effect_on_condition",
                 ...hookObj.base_setting,
                 id:`${this._prefix}_${key}_EVENT` as EocID,
-                effect:[...hookObj.before_effects??[],...mergeeffects,...hookObj.after_effects??[]]
-            }
+                effect:[
+                    ...hookObj.before_effects??[],
+                    ...mergeeffects,
+                    ...hookObj.after_effects??[],
+                ],
+                "//":{
+                    isUsed:mergeeffects.length>=1,
+                    require:hookObj.require_hook,
+                }
+            };
             //整合eoc数组
-            json.push(eoc);
+            jsonMap[key as AnyHook]=(eoc);
         }
-        return json;
+
+        const vaildMap:PRecord<AnyHook,BuildData> = {};
+        //删除无效eoc
+        Object.entries(jsonMap).forEach(([k,v])=>{
+            if(!v["//"].isUsed) return;
+            vaildMap[k as AnyHook]=v;
+            const req = v["//"].require??[];
+            for(const hook of req) vaildMap[hook as AnyHook]=jsonMap[hook as AnyHook];
+        });
+
+        //删除无效eoc调用
+        function delRunEocs(obj:any,param:string){
+            //console.log(param);
+            if(typeof obj=='string') return;
+            if(typeof obj!='object') return;
+            for(const k in obj){
+                const sobj = obj[k];
+                if(Array.isArray(sobj)){
+                    obj[k] = sobj.filter(ssobj => {
+                        if(typeof ssobj=='object' && 'run_eocs' in ssobj && ssobj.run_eocs==param)
+                            return false;
+                        return true;
+                    });
+                    obj[k].forEach((ssobj:any) => delRunEocs(ssobj,param));
+                }
+                if(typeof sobj=='object')
+                    delRunEocs(sobj,param);
+            }
+        }
+        Object.keys(jsonMap)
+            .filter(k=>!Object.keys(vaildMap).includes(k))
+            .forEach(k=>delRunEocs(vaildMap,jsonMap[k as AnyHook]!.id));
+
+        //删除builddata
+        for(const k in vaildMap)
+            delete (vaildMap[k as AnyHook] as any)["//"];
+
+        return Object.values(vaildMap);
     }
     /**添加事件  
      * @param hook - 触发时机

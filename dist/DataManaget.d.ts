@@ -1,4 +1,4 @@
-import { JObject, JToken } from "@zwa73/utils";
+import { JObject, JToken, UtilFT } from "@zwa73/utils";
 import { EventManager } from "./EventManager";
 import { AnyHook, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
@@ -40,7 +40,7 @@ export declare class DataManager {
      * @param filePath - 输出路径
      * @param obj      - 输出对象
      */
-    saveToFile(filePath: string, obj: JToken): Promise<void>;
+    saveToFile(filePath: string, obj: JToken, opt?: Parameters<typeof UtilFT.writeJSONFile>[2]): Promise<void>;
     /**添加自定义的Hook */
     addHook(hook: string, eoc: HookObj): void;
     /**获得Hook设定 */

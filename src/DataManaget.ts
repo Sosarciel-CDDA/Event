@@ -66,9 +66,9 @@ export class DataManager{
      * @param filePath - 输出路径
      * @param obj      - 输出对象
      */
-    async saveToFile(filePath:string,obj:JToken){
+    async saveToFile(filePath:string,obj:JToken,opt?:Parameters<typeof UtilFT.writeJSONFile>[2]){
         if(this._outPath==null) return;
-        return UtilFT.writeJSONFile(path.join(this._outPath,filePath),obj);
+        return UtilFT.writeJSONFile(path.join(this._outPath,filePath),obj,opt);
     }
     /**添加自定义的Hook */
     addHook(hook:string,eoc:HookObj){
@@ -111,14 +111,14 @@ export class DataManager{
 
         //导出js静态数据
         const staticData = this._staticTable;
-        for(let filePath in staticData){
-            let obj = staticData[filePath];
+        for(const filePath in staticData){
+            const obj = staticData[filePath];
             //await
             //console.log(this._outPath)
             //console.log(filePath)
             //console.log(path.parse(path.join(this._outPath,filePath)).dir)
             await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
-            this.saveToFile(filePath,obj);
+            this.saveToFile(filePath,obj,{compress:true});
         }
 
         //导出共用资源
@@ -129,6 +129,6 @@ export class DataManager{
 
         //导出event框架
         if(this._em)
-            this.saveToFile(`${this._em.getPrefix()}_event_frame`,this._em.build());
+            this.saveToFile(`${this._em.getPrefix()}_event_frame`,this._em.build(),{compress:true});
     }
 }

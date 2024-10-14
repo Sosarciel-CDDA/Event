@@ -1,4 +1,4 @@
-import { AnyString, JObject } from "@zwa73/utils";
+import { AnyString } from "@zwa73/utils";
 import { AnyHook, HookObj, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 export declare class EventManager {
@@ -7,7 +7,12 @@ export declare class EventManager {
     private _prefix;
     constructor(prefix: string, opt?: Partial<HookOpt>);
     /**导出 */
-    build(): JObject[];
+    build(): (Eoc & {
+        "//": {
+            isUsed: boolean;
+            require?: AnyHook[];
+        };
+    })[];
     /**添加事件
      * @param hook - 触发时机
      * @param weight - 权重 越大优先级越高

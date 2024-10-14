@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataManager = void 0;
 const utils_1 = require("@zwa73/utils");
-const path = require("path");
-const fs = require("fs");
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 const EventManager_1 = require("./EventManager");
 /**数据管理器 */
 class DataManager {
@@ -62,10 +85,10 @@ class DataManager {
      * @param filePath - 输出路径
      * @param obj      - 输出对象
      */
-    async saveToFile(filePath, obj) {
+    async saveToFile(filePath, obj, opt) {
         if (this._outPath == null)
             return;
-        return utils_1.UtilFT.writeJSONFile(path.join(this._outPath, filePath), obj);
+        return utils_1.UtilFT.writeJSONFile(path.join(this._outPath, filePath), obj, opt);
     }
     /**添加自定义的Hook */
     addHook(hook, eoc) {
@@ -113,14 +136,14 @@ class DataManager {
         }
         //导出js静态数据
         const staticData = this._staticTable;
-        for (let filePath in staticData) {
-            let obj = staticData[filePath];
+        for (const filePath in staticData) {
+            const obj = staticData[filePath];
             //await
             //console.log(this._outPath)
             //console.log(filePath)
             //console.log(path.parse(path.join(this._outPath,filePath)).dir)
             await utils_1.UtilFT.ensurePathExists(path.parse(path.join(this._outPath, filePath)).dir, { dir: true });
-            this.saveToFile(filePath, obj);
+            this.saveToFile(filePath, obj, { compress: true });
         }
         //导出共用资源
         for (const filePath in this._sharedTable) {
@@ -129,7 +152,7 @@ class DataManager {
         }
         //导出event框架
         if (this._em)
-            this.saveToFile(`${this._em.getPrefix()}_event_frame`, this._em.build());
+            this.saveToFile(`${this._em.getPrefix()}_event_frame`, this._em.build(), { compress: true });
     }
 }
 exports.DataManager = DataManager;
