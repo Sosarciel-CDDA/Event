@@ -84,29 +84,43 @@ class EventManager {
                 vaildMap[hook] = jsonMap[hook];
         });
         //删除无效eoc调用
-        function delRunEocs(obj, param) {
-            //console.log(param);
-            if (typeof obj == 'string')
-                return;
-            if (typeof obj != 'object')
-                return;
-            for (const k in obj) {
-                const sobj = obj[k];
-                if (Array.isArray(sobj)) {
-                    obj[k] = sobj.filter(ssobj => {
-                        if (typeof ssobj == 'object' && 'run_eocs' in ssobj && ssobj.run_eocs == param)
+        Object.keys(jsonMap)
+            .filter(k => !Object.keys(vaildMap).includes(k))
+            .forEach(k => {
+            const invaildID = jsonMap[k].id;
+            utils_1.UtilFunc.eachField(vaildMap, (key, value, parent) => {
+                if (Array.isArray(value)) {
+                    parent[key] = value.filter(sobj => {
+                        if (sobj != null && typeof sobj == 'object' && 'run_eocs' in sobj && sobj.run_eocs == invaildID)
                             return false;
                         return true;
                     });
-                    obj[k].forEach((ssobj) => delRunEocs(ssobj, param));
                 }
-                if (typeof sobj == 'object')
-                    delRunEocs(sobj, param);
+            });
+        });
+        //删除无效then else
+        utils_1.UtilFunc.eachField(vaildMap, (key, value, parent) => {
+            if ((key == 'then' || key == 'else') && Array.isArray(value) && value.length <= 0)
+                delete parent[key];
+        });
+        //删除无效if
+        utils_1.UtilFunc.eachField(vaildMap, (key, value, parent) => {
+            if (key == 'effect' && Array.isArray(value)) {
+                parent[key] = value.filter(sobj => {
+                    if (sobj != null && typeof sobj == 'object' && 'if' in sobj) {
+                        const el = sobj['else'];
+                        const th = sobj['then'];
+                        if ((el == null || (Array.isArray(el) && el.length <= 0)))
+                            delete sobj['else'];
+                        if ((th == null || (Array.isArray(th) && th.length <= 0)))
+                            delete sobj['then'];
+                        if (Object.keys(sobj).length == 1)
+                            return false;
+                    }
+                    return true;
+                });
             }
-        }
-        Object.keys(jsonMap)
-            .filter(k => !Object.keys(vaildMap).includes(k))
-            .forEach(k => delRunEocs(vaildMap, jsonMap[k].id));
+        });
         //删除builddata
         for (const k in vaildMap)
             delete vaildMap[k]["//"];

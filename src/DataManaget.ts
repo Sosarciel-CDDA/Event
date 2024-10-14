@@ -118,7 +118,7 @@ export class DataManager{
             //console.log(filePath)
             //console.log(path.parse(path.join(this._outPath,filePath)).dir)
             await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
-            this.saveToFile(filePath,obj,{compress:true});
+            this.saveToFile(filePath,obj,{compress:true,compressThreshold:60});
         }
 
         //导出共用资源
@@ -129,6 +129,6 @@ export class DataManager{
 
         //导出event框架
         if(this._em)
-            this.saveToFile(`${this._em.getPrefix()}_event_frame`,this._em.build(),{compress:true});
+            this.saveToFile(`${this._em.getPrefix()}_event_frame`,this._em.build(),{compress:true,compressThreshold:60});
     }
 }

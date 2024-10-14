@@ -1,4 +1,4 @@
-import { AnyString, JObject, PRecord, stringifyJToken } from "@zwa73/utils";
+import { AnyString, JObject, PRecord, stringifyJToken, UtilFT, UtilFunc } from "@zwa73/utils";
 import { AnyEventTypeList, AnyHook, genDefineHookMap, HookObj, HookOpt} from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "cdda-schema";
 
@@ -98,27 +98,43 @@ export class EventManager {
         });
 
         //删除无效eoc调用
-        function delRunEocs(obj:any,param:string){
-            //console.log(param);
-            if(typeof obj=='string') return;
-            if(typeof obj!='object') return;
-            for(const k in obj){
-                const sobj = obj[k];
-                if(Array.isArray(sobj)){
-                    obj[k] = sobj.filter(ssobj => {
-                        if(typeof ssobj=='object' && 'run_eocs' in ssobj && ssobj.run_eocs==param)
-                            return false;
-                        return true;
-                    });
-                    obj[k].forEach((ssobj:any) => delRunEocs(ssobj,param));
-                }
-                if(typeof sobj=='object')
-                    delRunEocs(sobj,param);
-            }
-        }
         Object.keys(jsonMap)
             .filter(k=>!Object.keys(vaildMap).includes(k))
-            .forEach(k=>delRunEocs(vaildMap,jsonMap[k as AnyHook]!.id));
+            .forEach(k=>{
+                const invaildID = jsonMap[k as AnyHook]!.id;
+                UtilFunc.eachField(vaildMap,(key,value,parent)=>{
+                    if(Array.isArray(value)){
+                        parent[key] = value.filter(sobj => {
+                            if(sobj!=null && typeof sobj=='object' && 'run_eocs' in sobj && sobj.run_eocs==invaildID)
+                                return false;
+                            return true;
+                        });
+                    }
+                });
+            });
+        //删除无效then else
+        UtilFunc.eachField(vaildMap,(key,value,parent)=>{
+            if((key=='then' || key=='else') && Array.isArray(value) && value.length<=0)
+                delete parent[key];
+        });
+        //删除无效if
+        UtilFunc.eachField(vaildMap,(key,value,parent)=>{
+            if(key=='effect' && Array.isArray(value)){
+                parent[key] = value.filter(sobj => {
+                    if(sobj!=null && typeof sobj == 'object' && 'if' in sobj){
+                        const el = sobj['else'];
+                        const th = sobj['then'];
+                        if((el==null || (Array.isArray(el) && el.length<=0)))
+                            delete sobj['else'];
+                        if((th==null || (Array.isArray(th) && th.length<=0)))
+                            delete sobj['then'];
+                        if(Object.keys(sobj).length==1)
+                            return false;
+                    }
+                    return true;
+                });
+            }
+        });
 
         //删除builddata
         for(const k in vaildMap)
