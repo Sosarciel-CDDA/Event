@@ -18,13 +18,13 @@ export declare const NpcHookList: readonly ["NpcDeathPrev"];
  */
 export type NpcHook = typeof NpcHookList[number];
 /**全局事件列表 列表 */
-export declare const GlobalHookList: readonly ["AvatarMove", "AvatarUpdate", "AvatarDeathPrev", "GameBegin", "GameStart"];
+export declare const GlobalHookList: readonly ["AvatarMove", "AvatarUpdate", "AvatarDeathPrev", "GameBegin", "GameStart", "None"];
 /**全局事件
  * u为主角 n未定义
  */
 export type GlobalHook = typeof GlobalHookList[number];
 /**任何事件 列表 */
-export declare const AnyEventTypeList: readonly ["AvatarMove", "AvatarUpdate", "AvatarDeathPrev", "GameBegin", "GameStart", "TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack", "Init", "Update", "NpcUpdate", "SlowUpdate", "TakeDamage", "LowHp", "NearDeath", "DeathPrev", "Death", "EnterBattle", "LeaveBattle", "BattleUpdate", "NonBattleUpdate", "MoveStatus", "IdleStatus", "AttackStatus", "WieldItemRaw", "WieldItem", "StowItem", "WearItem", "EatItem", "NpcDeathPrev"];
+export declare const AnyEventTypeList: readonly ["AvatarMove", "AvatarUpdate", "AvatarDeathPrev", "GameBegin", "GameStart", "None", "TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack", "Init", "Update", "NpcUpdate", "SlowUpdate", "TakeDamage", "LowHp", "NearDeath", "DeathPrev", "Death", "EnterBattle", "LeaveBattle", "BattleUpdate", "NonBattleUpdate", "MoveStatus", "IdleStatus", "AttackStatus", "WieldItemRaw", "WieldItem", "StowItem", "WearItem", "EatItem", "NpcDeathPrev"];
 /**任何事件
  * u n 均未定义
  */
@@ -72,4 +72,4 @@ export type HookOpt = {
  * @param prefix        - 事件前缀
  * @param opt           - 设定
  */
-export declare function genDefineHookMap(prefix: string, opt?: Partial<HookOpt>): Record<"TryMeleeAtkChar" | "TryMeleeAtkMon" | "TryRangeAtkChar" | "TryRangeAtkMon" | "TryMeleeAttack" | "TryRangeAttack" | "TryAttack" | "SucessMeleeAttack" | "MissMeleeAttack" | "Init" | "Update" | "NpcUpdate" | "SlowUpdate" | "TakeDamage" | "LowHp" | "NearDeath" | "DeathPrev" | "Death" | "EnterBattle" | "LeaveBattle" | "BattleUpdate" | "NonBattleUpdate" | "MoveStatus" | "IdleStatus" | "AttackStatus" | "WieldItemRaw" | "WieldItem" | "StowItem" | "WearItem" | "EatItem" | "NpcDeathPrev" | "AvatarMove" | "AvatarUpdate" | "AvatarDeathPrev" | "GameBegin" | "GameStart", HookObj>;
+export declare function genDefineHookMap(prefix: string, opt?: Partial<HookOpt>): Record<"None" | "TryMeleeAtkChar" | "TryMeleeAtkMon" | "TryRangeAtkChar" | "TryRangeAtkMon" | "TryMeleeAttack" | "TryRangeAttack" | "TryAttack" | "SucessMeleeAttack" | "MissMeleeAttack" | "Init" | "Update" | "NpcUpdate" | "SlowUpdate" | "TakeDamage" | "LowHp" | "NearDeath" | "DeathPrev" | "Death" | "EnterBattle" | "LeaveBattle" | "BattleUpdate" | "NonBattleUpdate" | "MoveStatus" | "IdleStatus" | "AttackStatus" | "WieldItemRaw" | "WieldItem" | "StowItem" | "WearItem" | "EatItem" | "NpcDeathPrev" | "AvatarMove" | "AvatarUpdate" | "AvatarDeathPrev" | "GameBegin" | "GameStart", HookObj>;

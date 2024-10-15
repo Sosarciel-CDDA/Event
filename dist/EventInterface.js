@@ -51,6 +51,7 @@ exports.GlobalHookList = [
     "AvatarDeathPrev", //玩家死亡
     "GameBegin", //每次进入游戏时
     "GameStart", //游戏第一次启动时
+    "None", //不会触发的Hook
 ];
 /**任何事件 列表 */
 exports.AnyEventTypeList = [
@@ -87,6 +88,7 @@ function genDefineHookMap(prefix, opt) {
     const RequireDefObj = (...reqs) => ({ ...DefHook, require_hook: reqs });
     //预定义的Hook
     const hookMap = {
+        None: DefHook,
         GameStart: {
             base_setting: {
                 eoc_type: "EVENT",
@@ -162,6 +164,7 @@ function genDefineHookMap(prefix, opt) {
             */
         },
         TryMeleeAttack: {
+            ...RequireDefObj('TryMeleeAtkChar', 'TryMeleeAtkMon'),
             base_setting: {
                 eoc_type: "ACTIVATION"
             },
@@ -212,10 +215,10 @@ function genDefineHookMap(prefix, opt) {
                     then: [rune("EnterBattle")],
                 }, { math: [uv("inBattle"), "=", `${battleDur}`] }]
         },
-        EnterBattle: RequireDefObj('TryAttack'),
-        LeaveBattle: RequireDefObj('Update'),
-        BattleUpdate: RequireDefObj('Update'),
-        NonBattleUpdate: RequireDefObj('Update'),
+        EnterBattle: RequireDefObj('TryAttack', 'TakeDamage'),
+        LeaveBattle: RequireDefObj('Update', 'TakeDamage', 'TryAttack'),
+        BattleUpdate: RequireDefObj('Update', 'TakeDamage', 'TryAttack'),
+        NonBattleUpdate: RequireDefObj('Update', 'TakeDamage', 'TryAttack'),
         NpcDeathPrev: {
             base_setting: {
                 eoc_type: "EVENT",
@@ -268,14 +271,15 @@ function genDefineHookMap(prefix, opt) {
                     if: "u_is_avatar",
                     then: [rune("AvatarUpdate")],
                 },
+                {
+                    if: { math: [uv("inBattle"), ">", "0"] },
+                    then: [rune("BattleUpdate"), { math: [uv("inBattle"), "-=", "1"] }, {
+                            if: { math: [uv("inBattle"), "<=", "0"] },
+                            then: [rune("LeaveBattle")],
+                        }],
+                    else: [rune("NonBattleUpdate")]
+                },
                 ...enableMoveStatus ? [{
-                        if: { math: [uv("inBattle"), ">", "0"] },
-                        then: [rune("BattleUpdate"), { math: [uv("inBattle"), "-=", "1"] }, {
-                                if: { math: [uv("inBattle"), "<=", "0"] },
-                                then: [rune("LeaveBattle")],
-                            }],
-                        else: [rune("NonBattleUpdate")]
-                    }, {
                         set_string_var: { u_val: uv("char_preloc") },
                         target_var: { global_val: gv("char_preloc") }
                     }, {

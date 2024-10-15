@@ -66,6 +66,7 @@ export const GlobalHookList = [
     "AvatarDeathPrev"       ,//玩家死亡
     "GameBegin"             ,//每次进入游戏时
     "GameStart"             ,//游戏第一次启动时
+    "None"                  ,//不会触发的Hook
 ] as const;
 /**全局事件  
  * u为主角 n未定义  
@@ -158,6 +159,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
 
     //预定义的Hook
     const hookMap:Record<AnyHook,HookObj>={
+        None:DefHook,
         GameStart:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -233,6 +235,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             */
         },
         TryMeleeAttack:{
+            ...RequireDefObj('TryMeleeAtkChar','TryMeleeAtkMon'),
             base_setting: {
                 eoc_type: "ACTIVATION"
             },
@@ -283,10 +286,10 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 then:[rune("EnterBattle")],
             },{math:[uv("inBattle"),"=",`${battleDur}`]}]
         },
-        EnterBattle:RequireDefObj('TryAttack'),
-        LeaveBattle:RequireDefObj('Update'),
-        BattleUpdate:RequireDefObj('Update'),
-        NonBattleUpdate:RequireDefObj('Update'),
+        EnterBattle:RequireDefObj('TryAttack','TakeDamage'),
+        LeaveBattle:RequireDefObj('Update','TakeDamage','TryAttack'),
+        BattleUpdate:RequireDefObj('Update','TakeDamage','TryAttack'),
+        NonBattleUpdate:RequireDefObj('Update','TakeDamage','TryAttack'),
         NpcDeathPrev:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -339,21 +342,22 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 if:"u_is_avatar",
                 then:[rune("AvatarUpdate")],
             },
-            ...enableMoveStatus?[{
-                    if:{math:[uv("inBattle"),">","0"]},
-                    then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
-                        if:{math:[uv("inBattle"),"<=","0"]},
-                        then:[rune("LeaveBattle")],
-                    }],
-                    else:[rune("NonBattleUpdate")]
-                },{//将uvar转为全局var防止比较报错
+            {
+                if:{math:[uv("inBattle"),">","0"]},
+                then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
+                    if:{math:[uv("inBattle"),"<=","0"]},
+                    then:[rune("LeaveBattle")],
+                }],
+                else:[rune("NonBattleUpdate")]
+            },
+            ...enableMoveStatus?[{//将uvar转为全局var防止比较报错
                     set_string_var: { u_val: uv("char_preloc") },
                     target_var: { global_val: gv("char_preloc") }
                 },{//通过比较 loc字符串 检测移动
                     if:{compare_string: [
-                            { global_val: gv("char_preloc") },
-                            { mutator: "loc_relative_u", target: "(0,0,0)" }
-                        ]},
+                        { global_val: gv("char_preloc") },
+                        { mutator: "loc_relative_u", target: "(0,0,0)" }
+                    ]},
                     then:[{math:[uv("onMoveStatus"),"=","0"]}],
                     else:[{math:[uv("onMoveStatus"),"=","1"]}],
                 },//更新 loc字符串

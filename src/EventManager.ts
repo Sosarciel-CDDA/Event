@@ -29,6 +29,7 @@ export class EventManager {
         };
         //加入effect
         for(const key in this._hookMap){
+            if(key=="None") continue;
             const fixkey = key as AnyHook;
             const hookObj = this._hookMap[fixkey];
             //加入effect

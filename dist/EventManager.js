@@ -16,6 +16,8 @@ class EventManager {
         const jsonMap = {};
         //加入effect
         for (const key in this._hookMap) {
+            if (key == "None")
+                continue;
             const fixkey = key;
             const hookObj = this._hookMap[fixkey];
             //加入effect
