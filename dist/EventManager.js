@@ -81,9 +81,17 @@ class EventManager {
             if (!v["//"].isUsed)
                 return;
             vaildMap[k] = v;
-            const req = v["//"].require ?? [];
-            for (const hook of req)
-                vaildMap[hook] = jsonMap[hook];
+            const addreq = (e) => {
+                if (e == null)
+                    return;
+                const req = e["//"].require ?? [];
+                for (const hook of req) {
+                    const sub = jsonMap[hook];
+                    vaildMap[hook] = sub;
+                    addreq(sub);
+                }
+            };
+            addreq(v);
         });
         //删除无效eoc调用
         Object.keys(jsonMap)

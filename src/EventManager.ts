@@ -94,8 +94,16 @@ export class EventManager {
         Object.entries(jsonMap).forEach(([k,v])=>{
             if(!v["//"].isUsed) return;
             vaildMap[k as AnyHook]=v;
-            const req = v["//"].require??[];
-            for(const hook of req) vaildMap[hook as AnyHook]=jsonMap[hook as AnyHook];
+            const addreq = (e:BuildData|undefined)=>{
+                if(e==null) return;
+                const req = e["//"].require??[];
+                for(const hook of req){
+                    const sub = jsonMap[hook as AnyHook];
+                    vaildMap[hook as AnyHook]=sub;
+                    addreq(sub);
+                }
+            }
+            addreq(v);
         });
 
         //删除无效eoc调用
