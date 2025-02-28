@@ -124,7 +124,7 @@ export class DataManager{
         //导出共用资源
         for(const filePath in this._sharedTable){
             await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
-            this.saveToFile(filePath,Object.values(this._sharedTable[filePath]));
+            this.saveToFile(filePath,Object.values(this._sharedTable[filePath]),{compress:true,compressThreshold:60});
         }
 
         //导出event框架
