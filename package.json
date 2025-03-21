@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "@zwa73/utils": "^1.0.204",
+    "@zwa73/js-utils": "^1.0.11",
+    "@zwa73/utils": "^1.0.210",
     "cdda-schema": "file:../CDDA-Schema"
   },
   "name": "cdda-event",
