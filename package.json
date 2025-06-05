@@ -1,10 +1,10 @@
 {
   "dependencies": {
+    "@sosarciel-cdda/cdda-schema": "^1.0.0",
     "@zwa73/js-utils": "^1.0.11",
-    "@zwa73/utils": "^1.0.210",
-    "cdda-schema": "file:../CDDA-Schema"
+    "@zwa73/utils": "^1.0.210"
   },
-  "name": "cdda-event",
+  "name": "@sosarciel-cdda/cdda-event",
   "version": "1.0.0",
   "description": "typescript的cddaevent快捷操作",
   "main": "index.js",
