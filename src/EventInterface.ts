@@ -1,4 +1,4 @@
-import { BoolObj, Eoc, EocEffect, EocID, EocType } from "cdda-schema";
+import { BoolObj, Eoc, EocEffect, EocID, EocType } from "@sosarciel-cdda/cdda-schema";
 
 //Interactive
 /**角色互动事件 列表 */

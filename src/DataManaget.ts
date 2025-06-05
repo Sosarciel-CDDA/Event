@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as  fs from 'fs';
 import { EventManager } from "./EventManager";
 import { AnyHook, HookOpt } from "./EventInterface";
-import { Eoc, EocEffect, EocID } from "cdda-schema";
+import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/cdda-schema";
 import { HookObj } from "./EventInterface";
 
 
