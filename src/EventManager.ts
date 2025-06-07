@@ -1,6 +1,6 @@
 import { AnyString, JObject, PRecord, stringifyJToken, UtilFT, UtilFunc } from "@zwa73/utils";
 import { AnyEventTypeList, AnyHook, genDefineHookMap, HookObj, HookOpt} from "./EventInterface";
-import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/cdda-schema";
+import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 
 
 /**事件效果 */
