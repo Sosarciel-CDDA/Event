@@ -1,6 +1,6 @@
 import { AnyString } from "@zwa73/utils";
 import { AnyHook, HookObj, HookOpt } from "./EventInterface";
-import { Eoc, EocEffect, EocID } from "cdda-schema";
+import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/sclema";
 export declare class EventManager {
     private _hookMap;
     private _effectsMap;
