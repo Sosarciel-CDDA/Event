@@ -1,4 +1,4 @@
-import { BoolObj, EocEffect, EocType } from "@sosarciel-cdda/sclema";
+import { BoolObj, EocEffect, EocType } from "@sosarciel-cdda/schema";
 /**角色互动事件 列表 */
 export declare const InteractHookList: readonly ["TryMeleeAtkChar", "TryMeleeAtkMon", "TryRangeAtkChar", "TryRangeAtkMon", "TryMeleeAttack", "TryRangeAttack", "TryAttack", "SucessMeleeAttack", "MissMeleeAttack"];
 /**角色互动事件

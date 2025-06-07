@@ -1,7 +1,7 @@
 import { JObject, JToken, UtilFT } from "@zwa73/utils";
 import { EventManager } from "./EventManager";
 import { AnyHook, HookOpt } from "./EventInterface";
-import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/sclema";
+import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 import { HookObj } from "./EventInterface";
 /**数据管理器 */
 export declare class DataManager {
