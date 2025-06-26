@@ -73,7 +73,7 @@ export class EventManager {
 
             const eoc:BuildData = {
                 type:"effect_on_condition",
-                ...hookObj.base_setting,
+                ...hookObj.base_setting as any,
                 id:`${this._prefix}_${key}_EVENT` as EocID,
                 effect:[
                     ...hookObj.before_effects??[],
