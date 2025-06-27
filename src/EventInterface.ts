@@ -175,6 +175,14 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             }],
             else:[rune("NonBattleUpdate")]
         },
+        //低速刷新计数
+        {math:[uv("SlowUpdateCounter"),'+=','1']},
+        {if:{math:[uv("SlowUpdateCounter"),">=", String(slowCounter)]},
+            then:[
+                {math:[uv("SlowUpdateCounter"),"=","0"]},
+                rune("SlowUpdate"),
+            ]
+        },
         ...enableMoveStatus?[{//将uvar转为全局var防止比较报错
                 set_string_var: { u_val: uv("char_preloc") },
                 target_var: { global_val: gv("char_preloc") }
@@ -196,6 +204,10 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 else:[rune("IdleStatus")],
             }],
             else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]
+        }];
+    const commonInit:EocEffect[] = [{
+            if:{math:[uv("isInit"),"!=","1"]},
+            then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
         }];
 
     //预定义的Hook
@@ -371,10 +383,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 global: true,
                 run_for_npcs: false
             },
-            before_effects:[{
-                if:{math:[uv("isInit"),"!=","1"]},
-                then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
-            }],
+            before_effects:[...commonInit],
             after_effects:[
             ...commonUpdate,
             rune("AvatarUpdate"),
@@ -389,16 +398,21 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             ]
         },
         Init:RequireDefObj('Update'),
-        NpcUpdate:RequireDefObj('Update'),
-        MonsterUpdate:RequireDefObj('Update'),
-        SlowUpdate:{
+        NpcUpdate:{
             base_setting: {
-                eoc_type:"RECURRING",
-                recurrence: slowCounter,
-                global: true,
-                run_for_npcs: false
-            }
+                eoc_type: "ACTIVATION"
+            },
+            before_effects:[...commonInit],
+            require_hook:["Update"]
         },
+        MonsterUpdate:{
+            base_setting: {
+                eoc_type: "ACTIVATION"
+            },
+            before_effects:[...commonInit],
+            require_hook:["Update"]
+        },
+        SlowUpdate:RequireDefObj('Update'),
         AvatarUpdate:RequireDefObj('Update'),
         WieldItemRaw:{
             base_setting: {
