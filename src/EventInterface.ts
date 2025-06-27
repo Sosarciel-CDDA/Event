@@ -1,4 +1,4 @@
-import { BoolObj, Eoc, EocEffect, EocID, EocType } from "@sosarciel-cdda/schema";
+import { BoolExpr, Eoc, EocEffect, EocID, EocType } from "@sosarciel-cdda/schema";
 
 //Interactive
 /**角色互动事件 列表 */
@@ -18,13 +18,25 @@ export const InteractHookList = [
  */
 export type InteractHook = typeof InteractHookList[number];
 
-/**任何角色事件 列表*/
-export const CharHookList = [
-    ...InteractHookList         ,//
+/**任何以刷新为基础的事件 列表*/
+export const UpdateBaseHookList = [
     "Init"                      ,//初始化
     "Update"                    ,//刷新
     "NpcUpdate"                 ,//Npc刷新
+    "MonsterUpdate"             ,//Monster刷新
     "SlowUpdate"                ,//慢速刷新
+    "MoveStatus"                ,//移动状态
+    "IdleStatus"                ,//待机状态
+    "AttackStatus"              ,//攻击状态
+] as const;
+/**任何以刷新为基础的事件 
+ * u为角色 n未定义  适用于怪物
+ */
+export type UpdateBaseHook = typeof UpdateBaseHookList[number];
+
+/**任何角色事件 列表*/
+export const CharHookList = [
+    ...InteractHookList         ,//
     "TakeDamage"                ,//受到伤害
     "LowHp"                     ,//低血量 受到任意伤害后 血量若低于阈值触发
     "NearDeath"                 ,//濒死   受到任意伤害后 血量若低于阈值触发
@@ -34,9 +46,6 @@ export const CharHookList = [
     "LeaveBattle"               ,//离开战斗
     "BattleUpdate"              ,//进入战斗时 刷新
     "NonBattleUpdate"           ,//非战斗时 刷新
-    "MoveStatus"                ,//移动状态
-    "IdleStatus"                ,//待机状态
-    "AttackStatus"              ,//攻击状态
     "WieldItemRaw"              ,//基础手持物品
     "WieldItem"                 ,//手持非空物品
     "StowItem"                  ,//收回物品/手持空物品
@@ -78,6 +87,7 @@ export const AnyEventTypeList = [
     ...GlobalHookList  ,
     ...CharHookList    ,
     ...NpcHookList     ,
+    ...UpdateBaseHookList ,
 ] as const;
 /**任何事件  
  * u n 均未定义
@@ -92,15 +102,15 @@ export type HookObj = {
         /**eoc类型 */
         eoc_type: EocType;
         /**条件 */
-        condition?:BoolObj;
+        condition?:BoolExpr;
         /**event依赖 */
         required_event?: string;
         /**刷新间隔/秒 */
         recurrence?: number;
         /**全局刷新 */
-        global?: true;
+        global?: boolean;
         /**运行于npc */
-        run_for_npcs?: true;
+        run_for_npcs?: boolean;
     }
     /**运行此事件前将会附带调用的EocEffect */
     before_effects?: EocEffect[];
@@ -156,6 +166,37 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
     }
     /**需求前置事件的默认hook */
     const RequireDefObj = (...reqs:AnyHook[])=>({...DefHook,require_hook:reqs});
+
+    const commonUpdate:EocEffect[] = [{
+            if:{math:[uv("inBattle"),">","0"]},
+            then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
+                if:{math:[uv("inBattle"),"<=","0"]},
+                then:[rune("LeaveBattle")],
+            }],
+            else:[rune("NonBattleUpdate")]
+        },
+        ...enableMoveStatus?[{//将uvar转为全局var防止比较报错
+                set_string_var: { u_val: uv("char_preloc") },
+                target_var: { global_val: gv("char_preloc") }
+            },{//通过比较 loc字符串 检测移动
+                if:{compare_string: [
+                    { global_val: gv("char_preloc") },
+                    { mutator: "loc_relative_u", target: "(0,0,0)" }
+                ]},
+                then:[{math:[uv("onMoveStatus"),"=","0"]}],
+                else:[{math:[uv("onMoveStatus"),"=","1"]}],
+            },//更新 loc字符串
+            {u_location_variable:{u_val:uv("char_preloc")}}
+        ] as EocEffect[]:[],
+        {//触发互斥状态
+            if:{math:[uv("notIdleOrMoveStatus"),"<=","0"]},
+            then:[{
+                if:{math:[uv("onMoveStatus"),">=","1"]},
+                then:[rune("MoveStatus")],
+                else:[rune("IdleStatus")],
+            }],
+            else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]
+        }];
 
     //预定义的Hook
     const hookMap:Record<AnyHook,HookObj>={
@@ -328,59 +369,34 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 eoc_type:"RECURRING",
                 recurrence: 1,
                 global: true,
-                run_for_npcs: true
+                run_for_npcs: false
             },
             before_effects:[{
                 if:{math:[uv("isInit"),"!=","1"]},
                 then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
             }],
-            after_effects:[{
-                if:"u_is_npc",
-                then:[rune("NpcUpdate")],
-            },
-            {
-                if:"u_is_avatar",
-                then:[rune("AvatarUpdate")],
-            },
-            {
-                if:{math:[uv("inBattle"),">","0"]},
-                then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
-                    if:{math:[uv("inBattle"),"<=","0"]},
-                    then:[rune("LeaveBattle")],
-                }],
-                else:[rune("NonBattleUpdate")]
-            },
-            ...enableMoveStatus?[{//将uvar转为全局var防止比较报错
-                    set_string_var: { u_val: uv("char_preloc") },
-                    target_var: { global_val: gv("char_preloc") }
-                },{//通过比较 loc字符串 检测移动
-                    if:{compare_string: [
-                        { global_val: gv("char_preloc") },
-                        { mutator: "loc_relative_u", target: "(0,0,0)" }
-                    ]},
-                    then:[{math:[uv("onMoveStatus"),"=","0"]}],
-                    else:[{math:[uv("onMoveStatus"),"=","1"]}],
-                },//更新 loc字符串
-                {u_location_variable:{u_val:uv("char_preloc")}}
-            ] as EocEffect[]:[],
-            {//触发互斥状态
-                if:{math:[uv("notIdleOrMoveStatus"),"<=","0"]},
-                then:[{
-                    if:{math:[uv("onMoveStatus"),">=","1"]},
-                    then:[rune("MoveStatus")],
-                    else:[rune("IdleStatus")],
-                }],
-                else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]
-            }]
+            after_effects:[
+            ...commonUpdate,
+            rune("AvatarUpdate"),
+            {u_run_npc_eocs:[{
+                id:eid("NpcUpdate_Inline" as any),
+                effect:[...commonUpdate,rune("NpcUpdate")],
+            }]},
+            {u_run_monster_eocs:[{
+                id:eid("MonsterUpdate_Inline" as any),
+                effect:[...commonUpdate,rune("MonsterUpdate")],
+            }]},
+            ]
         },
         Init:RequireDefObj('Update'),
         NpcUpdate:RequireDefObj('Update'),
+        MonsterUpdate:RequireDefObj('Update'),
         SlowUpdate:{
             base_setting: {
                 eoc_type:"RECURRING",
                 recurrence: slowCounter,
                 global: true,
-                run_for_npcs: true
+                run_for_npcs: false
             }
         },
         AvatarUpdate:RequireDefObj('Update'),
