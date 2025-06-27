@@ -176,10 +176,10 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             else:[rune("NonBattleUpdate")]
         },
         //低速刷新计数
-        {math:[uv("SlowUpdateCounter"),'+=','1']},
-        {if:{math:[uv("SlowUpdateCounter"),">=", String(slowCounter)]},
+        {math:[uv("slowUpdateCounter"),'+=','1']},
+        {if:{math:[uv("slowUpdateCounter"),">=", String(slowCounter)]},
             then:[
-                {math:[uv("SlowUpdateCounter"),"=","0"]},
+                {math:[uv("slowUpdateCounter"),"=","0"]},
                 rune("SlowUpdate"),
             ]
         },
