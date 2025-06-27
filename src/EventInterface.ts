@@ -389,29 +389,17 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             rune("AvatarUpdate"),
             {u_run_npc_eocs:[{
                 id:eid("NpcUpdate_Inline" as any),
-                effect:[rune("NpcUpdate"),...commonUpdate],
+                effect:[...commonInit,rune("NpcUpdate"),...commonUpdate],
             }]},
             {u_run_monster_eocs:[{
                 id:eid("MonsterUpdate_Inline" as any),
-                effect:[rune("MonsterUpdate"),...commonUpdate],
+                effect:[...commonInit,rune("MonsterUpdate"),...commonUpdate],
             }]},
             ]
         },
         Init:RequireDefObj('Update'),
-        NpcUpdate:{
-            base_setting: {
-                eoc_type: "ACTIVATION"
-            },
-            before_effects:[...commonInit],
-            require_hook:["Update"]
-        },
-        MonsterUpdate:{
-            base_setting: {
-                eoc_type: "ACTIVATION"
-            },
-            before_effects:[...commonInit],
-            require_hook:["Update"]
-        },
+        NpcUpdate:RequireDefObj('Update'),
+        MonsterUpdate:RequireDefObj('Update'),
         SlowUpdate:RequireDefObj('Update'),
         AvatarUpdate:RequireDefObj('Update'),
         WieldItemRaw:{
