@@ -389,11 +389,11 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             rune("AvatarUpdate"),
             {u_run_npc_eocs:[{
                 id:eid("NpcUpdate_Inline" as any),
-                effect:[...commonUpdate,rune("NpcUpdate")],
+                effect:[rune("NpcUpdate"),...commonUpdate],
             }]},
             {u_run_monster_eocs:[{
                 id:eid("MonsterUpdate_Inline" as any),
-                effect:[...commonUpdate,rune("MonsterUpdate")],
+                effect:[rune("MonsterUpdate"),...commonUpdate],
             }]},
             ]
         },
