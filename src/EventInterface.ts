@@ -21,7 +21,7 @@ export type InteractHook = typeof InteractHookList[number];
 /**任何以刷新为基础的事件 列表*/
 export const UpdateBaseHookList = [
     "Init"                      ,//初始化
-    "Update"                    ,//刷新
+    "Update"                    ,//公用刷新
     "NpcUpdate"                 ,//Npc刷新
     "MonsterUpdate"             ,//Monster刷新
     "SlowUpdate"                ,//慢速刷新
@@ -37,6 +37,7 @@ export type UpdateBaseHook = typeof UpdateBaseHookList[number];
 /**任何角色事件 列表*/
 export const CharHookList = [
     ...InteractHookList         ,//
+    ...UpdateBaseHookList       ,//
     "TakeDamage"                ,//受到伤害
     "LowHp"                     ,//低血量 受到任意伤害后 血量若低于阈值触发
     "NearDeath"                 ,//濒死   受到任意伤害后 血量若低于阈值触发
@@ -376,7 +377,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 eoc_type: "OM_MOVE"
             }
         },
-        Update:{
+        AvatarUpdate:{
             base_setting: {
                 eoc_type:"RECURRING",
                 recurrence: 1,
@@ -386,22 +387,22 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             before_effects:[...commonInit],
             after_effects:[
             ...commonUpdate,
-            rune("AvatarUpdate"),
+            rune("Update"),
             {u_run_npc_eocs:[{
                 id:eid("NpcUpdate_Inline" as any),
-                effect:[...commonInit,rune("NpcUpdate"),...commonUpdate],
+                effect:[...commonInit,rune("NpcUpdate"),...commonUpdate,rune("Update")],
             }]},
             {u_run_monster_eocs:[{
                 id:eid("MonsterUpdate_Inline" as any),
-                effect:[...commonInit,rune("MonsterUpdate"),...commonUpdate],
+                effect:[...commonInit,rune("MonsterUpdate"),...commonUpdate,rune("Update")],
             }]},
             ]
         },
-        Init:RequireDefObj('Update'),
-        NpcUpdate:RequireDefObj('Update'),
-        MonsterUpdate:RequireDefObj('Update'),
-        SlowUpdate:RequireDefObj('Update'),
-        AvatarUpdate:RequireDefObj('Update'),
+        Init:RequireDefObj('AvatarUpdate'),
+        NpcUpdate:RequireDefObj('AvatarUpdate'),
+        MonsterUpdate:RequireDefObj('AvatarUpdate'),
+        SlowUpdate:RequireDefObj('AvatarUpdate'),
+        Update:RequireDefObj('AvatarUpdate'),
         WieldItemRaw:{
             base_setting: {
                 eoc_type: "EVENT",
