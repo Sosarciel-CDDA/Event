@@ -131,6 +131,8 @@ export type HookOpt = {
     slowCounter:number  ;
     /**启用移动状态 默认 true */
     enableMoveStatus:boolean  ;
+    /**启用怪物刷新 默认 false */
+    enableMonUpdate:boolean  ;
     /**低血量事件血量阈值 默认 33% */
     lowHpThreshold:number  ;
     /**濒死事件血量阈值 默认 10% */
@@ -147,6 +149,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         battleDur           : 60    ,
         slowCounter         : 60    ,
         enableMoveStatus    : true  ,
+        enableMonUpdate     : false ,
         lowHpThreshold      : 0.33  ,
         nearDeathThreshold  : 0.1   ,
     },opt??{});
@@ -377,32 +380,35 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 eoc_type: "OM_MOVE"
             }
         },
-        AvatarUpdate:{
-            base_setting: {
+        Update:{
+            base_setting:{
                 eoc_type:"RECURRING",
                 recurrence: 1,
-                global: true,
-                run_for_npcs: false
+                run_for_npcs: true
             },
             before_effects:[...commonInit],
             after_effects:[
-            ...commonUpdate,
-            rune("Update"),
-            {u_run_npc_eocs:[{
-                id:eid("NpcUpdate_Inline" as any),
-                effect:[...commonInit,rune("NpcUpdate"),...commonUpdate,rune("Update")],
-            }]},
-            {u_run_monster_eocs:[{
-                id:eid("MonsterUpdate_Inline" as any),
-                effect:[...commonInit,rune("MonsterUpdate"),...commonUpdate,rune("Update")],
-            }]},
-            ]
+                ...commonUpdate,
+                {if:"u_is_npc",then:[ rune("NpcUpdate")]},
+                {if:"u_is_avatar",then:[
+                    rune("AvatarUpdate"),
+                    ... (opt?.enableMonUpdate ? [{u_run_monster_eocs:[{
+                    id:eid("MonsterUpdate_Inline" as any),
+                    effect:[
+                        ...commonInit,
+                        ...commonUpdate,
+                        rune("Update"),
+                        rune("MonsterUpdate"),
+                    ],
+                    }]}] : []),
+                ]}
+            ],
         },
-        Init:RequireDefObj('AvatarUpdate'),
-        NpcUpdate:RequireDefObj('AvatarUpdate'),
-        MonsterUpdate:RequireDefObj('AvatarUpdate'),
-        SlowUpdate:RequireDefObj('AvatarUpdate'),
-        Update:RequireDefObj('AvatarUpdate'),
+        Init:RequireDefObj('Update'),
+        AvatarUpdate:RequireDefObj("Update"),
+        NpcUpdate:RequireDefObj('Update'),
+        MonsterUpdate:RequireDefObj('Update'),
+        SlowUpdate:RequireDefObj('Update'),
         WieldItemRaw:{
             base_setting: {
                 eoc_type: "EVENT",
