@@ -384,7 +384,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             base_setting:{
                 eoc_type:"RECURRING",
                 recurrence: 1,
-                run_for_npcs: true
+                run_for_npcs: true,
+                global: true,
             },
             before_effects:[...commonInit],
             after_effects:[
