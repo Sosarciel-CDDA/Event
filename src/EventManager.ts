@@ -1,5 +1,5 @@
 import { AnyString, PRecord, stringifyJToken, UtilFunc } from "@zwa73/utils";
-import { AnyHook, genDefineHookMap, HelperEoc, HookObj, HookOpt} from "./EventInterface";
+import { AnyHook, genDefineHookMap, HelperEocID, HookObj, HookOpt} from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 
 
@@ -12,7 +12,7 @@ type EventEffect = {
 }
 export class EventManager {
     private _hookTable:Record<AnyHook|AnyString,HookObj>;
-    readonly helperEocTable:Record<HelperEoc,Eoc>;
+    readonly helperEocTable:Record<HelperEocID,Eoc>;
     private _effectsMap:Partial<Record<AnyHook|AnyString,EventEffect[]>> = {};
     private _prefix:string;
     constructor(prefix:string,opt?:Partial<HookOpt>){
@@ -152,7 +152,7 @@ export class EventManager {
         for(const k in vaildMap)
             delete (vaildMap[k as AnyHook] as any)["//"];
 
-        return [...Object.values(vaildMap),Object.values(this.helperEocTable)];
+        return [...Object.values(vaildMap),...Object.values(this.helperEocTable)];
     }
     /**添加事件  
      * @param hook - 触发时机
@@ -200,5 +200,9 @@ export class EventManager {
     /**获取前缀 */
     getPrefix(){
         return this._prefix;
+    }
+    /**获取帮助EOC */
+    getHelperEoc(id:HelperEocID){
+        return this.helperEocTable[id];
     }
 }

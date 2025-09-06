@@ -2,7 +2,7 @@ import { JArray, JObject, JToken, UtilFT } from "@zwa73/utils";
 import * as path from 'path';
 import * as  fs from 'fs';
 import { EventManager } from "./EventManager";
-import { AnyHook, HookOpt } from "./EventInterface";
+import { AnyHook, HelperEocID, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 import { HookObj } from "./EventInterface";
 
@@ -83,17 +83,22 @@ export class DataManager{
     /**添加事件 */
     addEvent(hook: AnyHook, weight: number, effects: EocEffect[]): void {
         if(this._em===undefined) throw "未定义事件框架ID前缀"
-        return this._em?.addEvent(hook,weight,effects);
+        return this._em.addEvent(hook,weight,effects);
     }
     /**添加调用eocid事件 */
     addInvokeID(hook: AnyHook, weight: number, ...eocids: EocID[]): void {
         if(this._em===undefined) throw "未定义事件框架ID前缀"
-        return this._em?.addInvokeID(hook,weight,...eocids);
+        return this._em.addInvokeID(hook,weight,...eocids);
     }
     /**添加调用eoc事件 */
     addInvokeEoc(hook: AnyHook, weight: number, ...eocs: Eoc[]): void {
         if(this._em===undefined) throw "未定义事件框架ID前缀"
-        return this._em?.addInvokeEoc(hook,weight,...eocs);
+        return this._em.addInvokeEoc(hook,weight,...eocs);
+    }
+    /**获取helper */
+    getHelperEoc(id: HelperEocID): Eoc {
+        if(this._em===undefined) throw "未定义事件框架ID前缀"
+        return this._em.getHelperEoc(id);
     }
     /**输出所有数据  
      * 并复制 dataPath/StaticData/** 静态资源  

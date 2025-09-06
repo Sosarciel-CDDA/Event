@@ -100,7 +100,7 @@ export const HelperEocList = [
     "TryJoinBattle",
 ] as const;
 /**辅助EOC */
-export type HelperEoc = typeof HelperEocList[number];
+export type HelperEocID = typeof HelperEocList[number];
 
 /**一个Hook */
 export type HookObj = {
@@ -221,8 +221,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         }];
 
     const ensureEnterBattle = [
-        {math:[uv("inBattle"),"=",`${battleDur}`]},
         {if:{math:[uv("inBattle"),"<=","0"]},then:[rune("EnterBattle")]},
+        {math:[uv("inBattle"),"=",`${battleDur}`]},
     ] satisfies EocEffect[];
 
     //泛事件优先级靠后
@@ -470,15 +470,9 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             type:"effect_on_condition",
             id:fid("TryJoinBattle"),
             eoc_type:"ACTIVATION",
-            effect:[
-                {if:{math:[uv("inBattle"),"<=","0"]},
-                then:[
-                    {math:[uv("inBattle"),"=",`${battleDur}`]},
-                    rune("EnterBattle"),
-                ]},
-            ]
+            effect:[...ensureEnterBattle]
         }
-    } satisfies Record<HelperEoc,Eoc>;
+    } satisfies Record<HelperEocID,Eoc>;
 
     return {hookTable,helperEocTable};
 }
