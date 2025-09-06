@@ -1,5 +1,5 @@
-import { AnyString, JObject, PRecord, stringifyJToken, UtilFT, UtilFunc } from "@zwa73/utils";
-import { AnyEventTypeList, AnyHook, genDefineHookMap, HookObj, HookOpt} from "./EventInterface";
+import { AnyString, PRecord, stringifyJToken, UtilFunc } from "@zwa73/utils";
+import { AnyHook, genDefineHookMap, HelperEoc, HookObj, HookOpt} from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 
 
@@ -11,11 +11,14 @@ type EventEffect = {
     weight:number;
 }
 export class EventManager {
-    private _hookMap:Record<AnyHook|AnyString,HookObj>;
+    private _hookTable:Record<AnyHook|AnyString,HookObj>;
+    readonly helperEocTable:Record<HelperEoc,Eoc>;
     private _effectsMap:Partial<Record<AnyHook|AnyString,EventEffect[]>> = {};
     private _prefix:string;
     constructor(prefix:string,opt?:Partial<HookOpt>){
-        this._hookMap=genDefineHookMap(prefix,opt);
+        const {hookTable,helperEocTable} = genDefineHookMap(prefix,opt);
+        this._hookTable=hookTable;
+        this.helperEocTable=helperEocTable;
         this._prefix = prefix;
     }
     /**导出 */
@@ -28,10 +31,10 @@ export class EventManager {
             }
         };
         //加入effect
-        for(const key in this._hookMap){
+        for(const key in this._hookTable){
             if(key=="None") continue;
             const fixkey = key as AnyHook;
-            const hookObj = this._hookMap[fixkey];
+            const hookObj = this._hookTable[fixkey];
             //加入effect
             const elist = this._effectsMap[fixkey]??[];
             elist.sort((a,b)=>b.weight-a.weight);
@@ -149,7 +152,7 @@ export class EventManager {
         for(const k in vaildMap)
             delete (vaildMap[k as AnyHook] as any)["//"];
 
-        return Object.values(vaildMap);
+        return [...Object.values(vaildMap),Object.values(this.helperEocTable)];
     }
     /**添加事件  
      * @param hook - 触发时机
@@ -183,16 +186,16 @@ export class EventManager {
     }
     /**添加自定义的Hook */
     addHook(hook:string,eoc:HookObj){
-        this._hookMap[hook] = eoc;
+        this._hookTable[hook] = eoc;
     }
     /**获得hook设定 */
     getHookObj(hook:string){
         this.verifyHook(hook);
-        return this._hookMap[hook];
+        return this._hookTable[hook];
     }
     /**验证hook是否存在 */
     private verifyHook(hook:string){
-        if(this._hookMap[hook]==null) throw `hook:${hook} 不存在`;
+        if(this._hookTable[hook]==null) throw `hook:${hook} 不存在`;
     }
     /**获取前缀 */
     getPrefix(){

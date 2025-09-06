@@ -95,6 +95,12 @@ export const AnyEventTypeList = [
  */
 export type AnyHook = typeof AnyEventTypeList[number];
 
+/**辅助EOC 列表 */
+export const HelperEocList = [
+    "TryJoinBattle",
+] as const;
+/**辅助EOC */
+export type HelperEoc = typeof HelperEocList[number];
 
 /**一个Hook */
 export type HookObj = {
@@ -156,7 +162,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
 
     const {statusDur,battleDur,slowCounter,enableMoveStatus,lowHpThreshold,nearDeathThreshold} = baseSetting;
 
-    const eid = (id:AnyHook)=>`${prefix}_${id}_EVENT` as EocID;
+    const eid = (id:AnyHook)=>`${prefix}_${id}_EVENT`;
     const rune = (id:AnyHook)=>({run_eocs:eid(id)});
     const uv = (id:string)=>`u_${prefix}_${id}`;
     const nv = (id:string)=>`n_${prefix}_${id}`;
@@ -214,8 +220,13 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
         }];
 
+    const ensureEnterBattle = [
+        {math:[uv("inBattle"),"=",`${battleDur}`]},
+        {if:{math:[uv("inBattle"),"<=","0"]},then:[rune("EnterBattle")]},
+    ] satisfies EocEffect[];
+
     //预定义的Hook
-    const hookMap:Record<AnyHook,HookObj>={
+    const hookTable:Record<AnyHook,HookObj>={
         None:DefHook,
         GameStart:{
             base_setting: {
@@ -234,11 +245,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 eoc_type: "EVENT",
                 required_event: "character_takes_damage"
             },
-            after_effects:[{
-                if:{math:[uv("inBattle"),"<=","0"]},
-                then:[rune("EnterBattle")],
-            },
-            {math:[uv("inBattle"),"=",`${battleDur}`]},
+            after_effects:[
+            ...ensureEnterBattle,
             {
                 if:{or:[
                     {math:["u_hp('head') / u_hp_max('head')"  ,"<=",`${lowHpThreshold}`]},
@@ -338,10 +346,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         TryAttack:{
             ...RequireDefObj('TryRangeAttack','TryMeleeAttack'),
             before_effects:[{math:[uv("notIdleOrMoveStatus"),"=",`${statusDur}`]}],
-            after_effects:[{
-                if:{math:[uv("inBattle"),"<=","0"]},
-                then:[rune("EnterBattle")],
-            },{math:[uv("inBattle"),"=",`${battleDur}`]}]
+            after_effects:[...ensureEnterBattle]
         },
         EnterBattle:RequireDefObj('TryAttack','TakeDamage'),
         LeaveBattle:RequireDefObj('Update','TakeDamage','TryAttack'),
@@ -454,5 +459,23 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         IdleStatus:RequireDefObj('Update'),
         AttackStatus:RequireDefObj('Update'),
     };
-    return hookMap;
+
+    const fid = (id:string)=>`${prefix}_${id}_FUNC` as const;
+    //辅助eoc函数
+    const helperEocTable = {
+        TryJoinBattle:{
+            type:"effect_on_condition",
+            id:fid("TryJoinBattle"),
+            eoc_type:"ACTIVATION",
+            effect:[
+                {if:{math:[uv("inBattle"),"<=","0"]},
+                then:[
+                    {math:[uv("inBattle"),"=",`${battleDur}`]},
+                    rune("EnterBattle"),
+                ]},
+            ]
+        }
+    } satisfies Record<HelperEoc,Eoc>;
+
+    return {hookTable,helperEocTable};
 }
