@@ -225,6 +225,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         {if:{math:[uv("inBattle"),"<=","0"]},then:[rune("EnterBattle")]},
     ] satisfies EocEffect[];
 
+    //泛事件优先级靠后
+    //基于事件变量判断的高层抽象事件靠后
     //预定义的Hook
     const hookTable:Record<AnyHook,HookObj>={
         None:DefHook,
@@ -392,9 +394,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 run_for_npcs: true,
                 global: true,
             },
-            before_effects:[...commonInit],
-            after_effects:[
-                ...commonUpdate,
+            before_effects:[
+                ...commonInit,
                 {if:"u_is_npc",then:[ rune("NpcUpdate")]},
                 {if:"u_is_avatar",then:[
                     rune("AvatarUpdate"),
@@ -402,13 +403,14 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                     id:eid("MonsterUpdate_Inline" as any),
                     effect:[
                         ...commonInit,
-                        ...commonUpdate,
-                        rune("Update"),
                         rune("MonsterUpdate"),
+                        rune("Update"),
+                        ...commonUpdate,
                     ],
                     }]}] : []),
                 ]}
             ],
+            after_effects:[...commonUpdate],
         },
         Init:RequireDefObj('Update'),
         AvatarUpdate:RequireDefObj("Update"),
