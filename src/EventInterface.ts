@@ -463,6 +463,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
     const fid = (id:string)=>`${prefix}_${id}_FUNC` as const;
     //辅助eoc函数
     const helperEocTable = {
+        /**尝试加入战斗 */
         TryJoinBattle:{
             type:"effect_on_condition",
             id:fid("TryJoinBattle"),
