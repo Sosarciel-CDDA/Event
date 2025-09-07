@@ -221,8 +221,12 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         }];
 
     const ensureEnterBattle = [
-        {if:{math:[uv("inBattle"),"<=","0"]},then:[rune("EnterBattle")]},
-        {math:[uv("inBattle"),"=",`${battleDur}`]},
+        {if:{math:[uv("inBattle"),"<=","0"]},
+        then:[
+            {math:[uv("inBattle"),"=",`${battleDur}`]}, //确保进入战斗时含有inBattle变量
+            rune("EnterBattle")
+        ],
+        else:[{math:[uv("inBattle"),"=",`${battleDur}`]}]},
     ] satisfies EocEffect[];
 
     //泛事件优先级靠后
