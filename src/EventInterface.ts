@@ -179,10 +179,12 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
 
     const commonUpdate:EocEffect[] = [{
             if:{math:[uv("inBattle"),">","0"]},
-            then:[rune("BattleUpdate"),{math:[uv("inBattle"),"-=","1"]},{
-                if:{math:[uv("inBattle"),"<=","0"]},
-                then:[rune("LeaveBattle")],
-            }],
+            then:[
+                rune("BattleUpdate"),
+                {math:[uv("inBattle"),"-=","1"]},
+                {if:{math:[uv("inBattle"),"<=","0"]},
+                    then:[rune("LeaveBattle")]}
+            ],
             else:[rune("NonBattleUpdate")]
         },
         //低速刷新计数
@@ -193,28 +195,28 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 rune("SlowUpdate"),
             ]
         },
-        ...enableMoveStatus?[{//将uvar转为全局var防止比较报错
-                set_string_var: { u_val: uv("char_preloc") },
-                target_var: { global_val: gv("char_preloc") }
-            },{//通过比较 loc字符串 检测移动
-                if:{compare_string: [
+        ...enableMoveStatus?[
+            //将uvar转为全局var防止比较报错
+            {set_string_var: { u_val: uv("char_preloc") },
+                target_var: { global_val: gv("char_preloc") }},
+            //通过比较 loc字符串 检测移动
+            {if:{compare_string: [
                     { global_val: gv("char_preloc") },
-                    { mutator: "loc_relative_u", target: "(0,0,0)" }
-                ]},
+                    { mutator: "loc_relative_u", target: "(0,0,0)" }]},
                 then:[{math:[uv("onMoveStatus"),"=","0"]}],
-                else:[{math:[uv("onMoveStatus"),"=","1"]}],
-            },//更新 loc字符串
+                else:[{math:[uv("onMoveStatus"),"=","1"]}]},
+            //更新 loc字符串
             {u_location_variable:{u_val:uv("char_preloc")}}
         ] as EocEffect[]:[],
-        {//触发互斥状态
-            if:{math:[uv("notIdleOrMoveStatus"),"<=","0"]},
-            then:[{
-                if:{math:[uv("onMoveStatus"),">=","1"]},
-                then:[rune("MoveStatus")],
-                else:[rune("IdleStatus")],
-            }],
-            else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]
-        }];
+        //触发互斥状态
+        {if:{math:[uv("notIdleOrMoveStatus"),"<=","0"]},
+            then:[
+                {if:{math:[uv("onMoveStatus"),">=","1"]},
+                    then:[rune("MoveStatus")],
+                    else:[rune("IdleStatus")]}
+            ],
+            else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]}
+        ];
     const commonInit:EocEffect[] = [{
             if:{math:[uv("isInit"),"!=","1"]},
             then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
@@ -222,11 +224,11 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
 
     const ensureEnterBattle = [
         {if:{math:[uv("inBattle"),"<=","0"]},
-        then:[
-            {math:[uv("inBattle"),"=",`${battleDur}`]}, //确保进入战斗时含有inBattle变量
-            rune("EnterBattle")
-        ],
-        else:[{math:[uv("inBattle"),"=",`${battleDur}`]}]},
+            then:[
+                {math:[uv("inBattle"),"=",`${battleDur}`]}, //确保进入战斗时含有inBattle变量
+                rune("EnterBattle")
+            ],
+            else:[{math:[uv("inBattle"),"=",`${battleDur}`]}]},
     ] satisfies EocEffect[];
 
     //泛事件优先级靠后
