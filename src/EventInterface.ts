@@ -1,4 +1,4 @@
-import { BoolExpr, Eoc, EocEffect, EocID, EocType } from "@sosarciel-cdda/schema";
+import { BoolExpr, Eoc, EocEffect, EocID, EocType, JM } from "@sosarciel-cdda/schema";
 
 //Interactive
 /**角色互动事件 列表 */
@@ -254,7 +254,10 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
                 required_event: "character_takes_damage"
             },
             after_effects:[
-            ...ensureEnterBattle,
+            //只在有敌人时进入战斗
+            {if:{math:[JM.monstersNearby('u',[],{radius:'20',attitude:`'hostile'`}),">=","1"]},then:[
+                ...ensureEnterBattle,
+            ]},
             {
                 if:{or:[
                     {math:["u_hp('head') / u_hp_max('head')"  ,"<=",`${lowHpThreshold}`]},
