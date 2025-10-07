@@ -255,7 +255,10 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             },
             after_effects:[
             //只在有敌人时进入战斗
-            {if:{math:[JM.monstersNearby('u',[],{radius:'20',attitude:`'hostile'`}),">=","1"]},then:[
+            {if:{or:[
+                "npc_exists",
+                {math:[JM.monstersNearby('u',[],{radius:'20',attitude:`'hostile'`}),">=","1"]},
+            ]},then:[
                 ...ensureEnterBattle,
             ]},
             {
