@@ -364,7 +364,15 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         },
         EnterBattle:RequireDefObj('TryAttack','TakeDamage'),
         LeaveBattle:RequireDefObj('Update','TakeDamage','TryAttack'),
-        BattleUpdate:RequireDefObj('Update','TakeDamage','TryAttack'),
+        BattleUpdate:{
+            ...RequireDefObj('Update','TakeDamage','TryAttack'),
+            after_effects:[
+                //有敌人时维持战斗
+                {if:{math:[JM.monstersNearby('u',[],{radius:'20',attitude:`'hostile'`}),">=","1"]},then:[
+                    ...ensureEnterBattle,
+                ]},
+            ]
+        },
         NonBattleUpdate:RequireDefObj('Update','TakeDamage','TryAttack'),
         NpcDeathPrev:{
             base_setting: {
