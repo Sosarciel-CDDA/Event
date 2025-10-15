@@ -47,6 +47,7 @@ export const CharHookList = [
     "LeaveBattle"               ,//离开战斗
     "BattleUpdate"              ,//进入战斗时 刷新
     "NonBattleUpdate"           ,//非战斗时 刷新
+    "NonBattleSlowUpdate"       ,//非战斗时 慢速刷新
     "WieldItemRaw"              ,//基础手持物品
     "WieldItem"                 ,//手持非空物品
     "StowItem"                  ,//收回物品/手持空物品
@@ -162,7 +163,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
 
     const {statusDur,battleDur,slowCounter,enableMoveStatus,lowHpThreshold,nearDeathThreshold} = baseSetting;
 
-    const eid = (id:AnyHook)=>`${prefix}_${id}_EVENT`;
+    const eid = (id:AnyHook)=>`${prefix}_${id}_Event`;
     const rune = (id:AnyHook)=>({run_eocs:eid(id)});
     const uv = (id:string)=>`u_${prefix}_${id}`;
     const nv = (id:string)=>`n_${prefix}_${id}`;
@@ -178,20 +179,20 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
     const RequireDefObj = (...reqs:AnyHook[])=>({...DefHook,require_hook:reqs});
 
     const commonUpdate:EocEffect[] = [{
-            if:{math:[uv("inBattle"),">","0"]},
+            if:{math:[uv("InBattle"),">","0"]},
             then:[
                 rune("BattleUpdate"),
-                {math:[uv("inBattle"),"-=","1"]},
-                {if:{math:[uv("inBattle"),"<=","0"]},
+                {math:[uv("InBattle"),"-=","1"]},
+                {if:{math:[uv("InBattle"),"<=","0"]},
                     then:[rune("LeaveBattle")]}
             ],
             else:[rune("NonBattleUpdate")]
         },
         //低速刷新计数
-        {math:[uv("slowUpdateCounter"),'+=','1']},
-        {if:{math:[uv("slowUpdateCounter"),">=", String(slowCounter)]},
+        {math:[uv("SlowUpdateCounter"),'+=','1']},
+        {if:{math:[uv("SlowUpdateCounter"),">=", String(slowCounter)]},
             then:[
-                {math:[uv("slowUpdateCounter"),"=","0"]},
+                {math:[uv("SlowUpdateCounter"),"=","0"]},
                 rune("SlowUpdate"),
             ]
         },
@@ -203,32 +204,32 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             {if:{compare_string: [
                     { global_val: gv("char_preloc") },
                     { mutator: "loc_relative_u", target: "(0,0,0)" }]},
-                then:[{math:[uv("onMoveStatus"),"=","0"]}],
-                else:[{math:[uv("onMoveStatus"),"=","1"]}]},
+                then:[{math:[uv("OnMoveStatus"),"=","0"]}],
+                else:[{math:[uv("OnMoveStatus"),"=","1"]}]},
             //更新 loc字符串
             {u_location_variable:{u_val:uv("char_preloc")}}
         ] as EocEffect[]:[],
         //触发互斥状态
-        {if:{math:[uv("notIdleOrMoveStatus"),"<=","0"]},
+        {if:{math:[uv("NotIdleOrMoveStatus"),"<=","0"]},
             then:[
-                {if:{math:[uv("onMoveStatus"),">=","1"]},
+                {if:{math:[uv("OnMoveStatus"),">=","1"]},
                     then:[rune("MoveStatus")],
                     else:[rune("IdleStatus")]}
             ],
-            else:[rune("AttackStatus"),{math:[uv("notIdleOrMoveStatus"),"-=","1"]}]}
+            else:[rune("AttackStatus"),{math:[uv("NotIdleOrMoveStatus"),"-=","1"]}]}
         ];
     const commonInit:EocEffect[] = [{
-            if:{math:[uv("isInit"),"!=","1"]},
-            then:[rune("Init"),{math:[uv("isInit"),"=","1"]}]
+            if:{math:[uv("IsInit"),"!=","1"]},
+            then:[rune("Init"),{math:[uv("IsInit"),"=","1"]}]
         }];
 
     const ensureEnterBattle = [
-        {if:{math:[uv("inBattle"),"<=","0"]},
+        {if:{math:[uv("InBattle"),"<=","0"]},
             then:[
-                {math:[uv("inBattle"),"=",`${battleDur}`]}, //确保进入战斗时含有inBattle变量
+                {math:[uv("InBattle"),"=",`${battleDur}`]}, //确保进入战斗时含有InBattle变量
                 rune("EnterBattle")
             ],
-            else:[{math:[uv("inBattle"),"=",`${battleDur}`]}]},
+            else:[{math:[uv("InBattle"),"=",`${battleDur}`]}]},
     ] satisfies EocEffect[];
 
     //泛事件优先级靠后
@@ -359,7 +360,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         },
         TryAttack:{
             ...RequireDefObj('TryRangeAttack','TryMeleeAttack'),
-            before_effects:[{math:[uv("notIdleOrMoveStatus"),"=",`${statusDur}`]}],
+            before_effects:[{math:[uv("NotIdleOrMoveStatus"),"=",`${statusDur}`]}],
             after_effects:[...ensureEnterBattle]
         },
         EnterBattle:RequireDefObj('TryAttack','TakeDamage'),
@@ -374,6 +375,7 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
             ]
         },
         NonBattleUpdate:RequireDefObj('Update','TakeDamage','TryAttack'),
+        NonBattleSlowUpdate:RequireDefObj('SlowUpdate','TakeDamage','TryAttack'),
         NpcDeathPrev:{
             base_setting: {
                 eoc_type: "EVENT",
@@ -404,7 +406,8 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         Death:RequireDefObj('DeathPrev'),
         AvatarMove:{
             base_setting: {
-                eoc_type: "OM_MOVE"
+                eoc_type: "EVENT",
+                required_event: "avatar_moves",
             }
         },
         Update:{
@@ -436,7 +439,13 @@ export function genDefineHookMap(prefix:string,opt?:Partial<HookOpt>){
         AvatarUpdate:RequireDefObj("Update"),
         NpcUpdate:RequireDefObj('Update'),
         MonsterUpdate:RequireDefObj('Update'),
-        SlowUpdate:RequireDefObj('Update'),
+        SlowUpdate:{
+            ...RequireDefObj('Update'),
+            after_effects:[
+                {if:{math:[uv('InBattle'),'<=','0']},
+                    then:[rune("NonBattleSlowUpdate")]}
+            ]
+        },
         WieldItemRaw:{
             base_setting: {
                 eoc_type: "EVENT",

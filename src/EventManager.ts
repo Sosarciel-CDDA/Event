@@ -77,7 +77,7 @@ export class EventManager {
             const eoc:BuildData = {
                 type:"effect_on_condition",
                 ...hookObj.base_setting as any,
-                id:`${this._prefix}_${key}_EVENT` as EocID,
+                id:`${this._prefix}_${key}_Event` as EocID,
                 effect:[
                     ...hookObj.before_effects??[],
                     ...mergeeffects,
@@ -124,29 +124,41 @@ export class EventManager {
                     }
                 });
             });
-        //删除无效then else
-        UtilFunc.eachField(vaildMap,(key,value,parent)=>{
-            if((key=='then' || key=='else') && Array.isArray(value) && value.length<=0)
-                delete parent[key];
-        });
-        //删除无效if
-        UtilFunc.eachField(vaildMap,(key,value,parent)=>{
-            if(key=='effect' && Array.isArray(value)){
-                parent[key] = value.filter(sobj => {
-                    if(sobj!=null && typeof sobj == 'object' && 'if' in sobj){
-                        const el = sobj['else'];
-                        const th = sobj['then'];
-                        if((el==null || (Array.isArray(el) && el.length<=0)))
-                            delete sobj['else'];
-                        if((th==null || (Array.isArray(th) && th.length<=0)))
-                            delete sobj['then'];
-                        if(Object.keys(sobj).length==1)
-                            return false;
-                    }
-                    return true;
-                });
-            }
-        });
+        let hasopera = true;
+        while(hasopera){
+            hasopera = false;
+            //删除无效then else
+            UtilFunc.eachField(vaildMap,(key,value,parent)=>{
+                if((key=='then' || key=='else') && Array.isArray(value) && value.length<=0){
+                    delete parent[key];
+                    hasopera = true;
+                }
+            });
+            //删除无效if
+            UtilFunc.eachField(vaildMap,(key,value,parent)=>{
+                if(['effect','then','else'].includes(key) && Array.isArray(value)){
+                    parent[key] = value.filter(sobj => {
+                        if(sobj!=null && typeof sobj == 'object' && 'if' in sobj){
+                            const el = sobj['else'];
+                            const th = sobj['then'];
+                            if((el===null || (Array.isArray(el) && el.length<=0))){
+                                delete sobj['else'];
+                                hasopera = true;
+                            }
+                            if((th===null || (Array.isArray(th) && th.length<=0))){
+                                delete sobj['then'];
+                                hasopera = true;
+                            }
+                            if(Object.keys(sobj).length==1){
+                                hasopera = true;
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+                }
+            });
+        }
 
         //删除builddata
         for(const k in vaildMap)

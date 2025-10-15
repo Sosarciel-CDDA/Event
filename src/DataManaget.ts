@@ -134,6 +134,6 @@ export class DataManager{
 
         //导出event框架
         if(this._em)
-            this.saveToFile(`${this._em.getPrefix()}_event_frame`,this._em.build(),{compress:true,compressThreshold:60});
+            this.saveToFile(this._em.getPrefix(),this._em.build(),{compress:true,compressThreshold:60});
     }
 }
