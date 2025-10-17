@@ -3,6 +3,38 @@ import { AnyHook, genDefineHookMap, HelperEocID, HookObj, HookOpt} from "./Event
 import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 
 
+
+//合并if
+function mergeIf(effects:EocEffect[]){
+    const merges:EocEffect[]=[];
+    effects.forEach((curre)=>{
+        const laste = merges[merges.length-1];
+        if( typeof laste == "object" && 'if' in laste && Array.isArray(laste.then) &&
+            typeof curre == "object" && 'if' in curre && Array.isArray(curre.then) &&
+            laste.then.length < 50 && stringifyJToken(laste.if) == stringifyJToken(curre.if)){
+                laste.then.push(...curre.then);
+                laste.then = mergeRuneocs(laste.then);
+        }else
+            merges.push(curre)
+    })
+    return merges;
+}
+//合并runeocs
+function mergeRuneocs(effects:EocEffect[]){
+    const merges:EocEffect[]=[];
+    effects.forEach((curre)=>{
+        const laste = merges[merges.length-1];
+        if( typeof laste == "object" && 'run_eocs' in laste && Array.isArray(laste.run_eocs) &&
+            typeof curre == "object" && 'run_eocs' in curre && Array.isArray(curre.run_eocs) &&
+            laste.run_eocs.length < 50 ){
+                laste.run_eocs.push(...curre.run_eocs)
+        }else
+            merges.push(curre)
+    })
+    return merges;
+}
+
+
 /**事件效果 */
 type EventEffect = {
     /**eoc效果 */
@@ -43,34 +75,6 @@ export class EventManager {
             const eventeffects:EocEffect[] = [];
             elist.forEach((e)=>eventeffects.push(...e.effects));
 
-            //合并if
-            function mergeIf(effects:EocEffect[]){
-                const merges:EocEffect[]=[];
-                effects.forEach((curre)=>{
-                    const laste = merges[merges.length-1];
-                    if( typeof laste == "object" && 'if' in laste && Array.isArray(laste.then) &&
-                        typeof curre == "object" && 'if' in curre && Array.isArray(curre.then) &&
-                        stringifyJToken(laste.if) == stringifyJToken(curre.if)){
-                            laste.then.push(...curre.then);
-                            laste.then = mergeRuneocs(laste.then);
-                    }else
-                        merges.push(curre)
-                })
-                return merges;
-            }
-            //合并runeocs
-            function mergeRuneocs(effects:EocEffect[]){
-                const merges:EocEffect[]=[];
-                effects.forEach((curre)=>{
-                    const laste = merges[merges.length-1];
-                    if( typeof laste == "object" && 'run_eocs' in laste && Array.isArray(laste.run_eocs) &&
-                        typeof curre == "object" && 'run_eocs' in curre && Array.isArray(curre.run_eocs)){
-                            laste.run_eocs.push(...curre.run_eocs)
-                    }else
-                        merges.push(curre)
-                })
-                return merges;
-            }
             //合并
             const mergeeffects = mergeRuneocs(mergeIf(eventeffects));
 
