@@ -1,6 +1,6 @@
 import { JArray, JObject, JToken, UtilFT } from "@zwa73/utils";
 import * as path from 'path';
-import * as  fs from 'fs';
+import * as fs from 'fs';
 import { EventManager } from "./EventManager";
 import { AnyHook, HelperEocID, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
@@ -123,17 +123,17 @@ export class DataManager{
             //console.log(filePath)
             //console.log(path.parse(path.join(this._outPath,filePath)).dir)
             await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
-            this.saveToFile(filePath,obj,{compress:true,compressThreshold:60});
+            this.saveToFile(filePath,obj,{compress:true,compressThreshold:100});
         }
 
         //导出共用资源
         for(const filePath in this._sharedTable){
             await UtilFT.ensurePathExists(path.parse(path.join(this._outPath,filePath)).dir,{dir:true});
-            this.saveToFile(filePath,Object.values(this._sharedTable[filePath]),{compress:true,compressThreshold:60});
+            this.saveToFile(filePath,Object.values(this._sharedTable[filePath]),{compress:true,compressThreshold:100});
         }
 
         //导出event框架
         if(this._em)
-            this.saveToFile(this._em.getPrefix(),this._em.build(),{compress:true,compressThreshold:60});
+            this.saveToFile(this._em.getPrefix(),this._em.build(),{compress:true,compressThreshold:100});
     }
 }
