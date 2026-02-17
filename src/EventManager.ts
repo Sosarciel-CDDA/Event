@@ -1,5 +1,5 @@
 import { AnyString, PRecord, stringifyJToken, UtilFunc } from "@zwa73/utils";
-import { AnyHook, genDefineHookMap, HelperEocID, HookObj, HookOpt} from "./EventInterface";
+import { AnyHook, genDefineHookMap, HelperEocID, HookObj, HookOpt } from "./EventInterface";
 import { Eoc, EocEffect, EocID } from "@sosarciel-cdda/schema";
 
 

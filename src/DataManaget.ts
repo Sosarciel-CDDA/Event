@@ -23,6 +23,7 @@ export class DataManager{
     private _staticTable:Record<string,JArray>={};
     /**共用资源表 */
     private _sharedTable:Record<string,Record<string,JObject>>={};
+    private _emOutPath:string;
 
     //———————————————————— 初始化 ————————————————————//
     /**
@@ -30,12 +31,21 @@ export class DataManager{
      * @param outPath  - 输出数据路径 默认无输出  
      * @param emPrefix - 事件框架前缀 未设置则无事建框架
      */
-    constructor(dataPath?:string,outPath?:string,emPrefix?:string,opt?:Partial<HookOpt>){
+    constructor(opt:{
+        dataPath?:string,
+        outPath?:string,
+        emPrefix?:string,
+        emOutPath?:string,
+        hookOpt?:Partial<HookOpt>
+    }={}){
+        const {dataPath,outPath,emPrefix,emOutPath,hookOpt} = opt;
+
         //初始化资源io路径
         this._outPath  = outPath;
+        this._emOutPath = emOutPath??'';
         this._dataPath = dataPath;
         if(emPrefix!=null)
-            this._em = new EventManager(emPrefix,opt);
+            this._em = new EventManager(emPrefix,hookOpt);
     }
     /**添加共享资源 同filepath+key会覆盖  
      * 出现与原数据不同的数据时会提示  
@@ -134,6 +144,6 @@ export class DataManager{
 
         //导出event框架
         if(this._em)
-            this.saveToFile(this._em.getPrefix(),this._em.build(),{compress:true,compressThreshold:100});
+            this.saveToFile(path.join(this._emOutPath,this._em.getPrefix()),this._em.build(),{compress:true,compressThreshold:100});
     }
 }
