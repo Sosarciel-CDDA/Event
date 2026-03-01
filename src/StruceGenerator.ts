@@ -133,6 +133,13 @@ export const setupCtor = (opt:{
             ...v.effect??[],
         ] satisfies EocEffect[]),
     }
+    const gamestartSetupEoc:Eoc = {
+        id:`${prefix}_EOC_GameStart_DefaultSetup`,
+        type:"effect_on_condition",
+        eoc_type:"EVENT",
+        required_event:"game_start",
+        effect:[{run_eocs:[defSetupEoc.id]}],
+    }
 
     const customSetupEoc:Eoc = {
         id:`${prefix}_EOC_CustomSetup`,
@@ -187,7 +194,7 @@ export const setupCtor = (opt:{
         ],
     }
 
-    return [defSetupEoc,customSetupEoc,setupTopic,openSettingEoc,setupMut,setupEoc]
+    return [defSetupEoc,gamestartSetupEoc,customSetupEoc,setupTopic,openSettingEoc,setupMut,setupEoc]
 }
 
 
