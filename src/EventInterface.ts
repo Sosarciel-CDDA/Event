@@ -1,4 +1,4 @@
-import { BoolExpr, Eoc, EocEffect, EocID, EocType, JM } from "@sosarciel-cdda/schema";
+import { BoolExpr, Eoc, EocEffect, EocType, JM } from "@sosarciel-cdda/schema";
 
 //Interactive
 /**角色互动事件 列表 */
@@ -69,6 +69,15 @@ export const NpcHookList = [
  */
 export type NpcHook = typeof NpcHookList[number];
 
+///**仅Monster事件 列表 */
+//export const MonsterHookList = [
+//    "MonsterTakeDamage"              ,//死亡前 恢复生命将自动阻止死亡
+//] as const;
+///**仅Monster事件  
+// * u为Npc n未定义  
+// */
+//export type MonsterHook = typeof NpcHookList[number];
+
 
 /**全局事件列表 列表 */
 export const GlobalHookList = [
@@ -89,6 +98,7 @@ export const AnyEventTypeList = [
     ...GlobalHookList  ,
     ...CharHookList    ,
     ...NpcHookList     ,
+//    ...MonsterHookList ,
     ...UpdateBaseHookList ,
 ] as const;
 /**任何事件  
